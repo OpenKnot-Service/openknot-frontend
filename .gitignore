@@ -389,3 +389,10 @@ BackendTechSpec.md
 docs/
 
 # End of https://www.toptal.com/developers/gitignore/api/node,macos,visualstudiocode,react,storybookjs,intellij,intellij+all
+dev-dist/
+
+GITHUB_FILE_BROWSER.md
+
+TreeViewRef.PNG
+
+temp/
