@@ -67,10 +67,12 @@ const aiInsights = [
 
 export default function DashboardPage() {
   const { notifications, user, markNotificationAsRead, isNotificationCenterOpen } = useApp();
+  const userId = user?.id;
 
   const unreadNotifications = useMemo(() => {
-    return notifications.filter((n) => n.userId === user.id && !n.read);
-  }, [notifications, user.id]);
+    if (!userId) return [];
+    return notifications.filter((n) => n.userId === userId && !n.read);
+  }, [notifications, userId]);
 
   return (
     <div className="relative">
