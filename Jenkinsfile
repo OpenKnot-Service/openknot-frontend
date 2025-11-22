@@ -25,9 +25,6 @@ pipeline {
         }
 
         stage('Deploy') {
-            when {
-                branch 'main'
-            }
             steps {
                 sh """
                     docker stop ${CONTAINER_NAME} || true
@@ -35,7 +32,7 @@ pipeline {
 
                     docker run -d \
                         --name ${CONTAINER_NAME} \
-                        -p 3100:80 \
+                        -p 3100:3100 \
                         --restart=always \
                         ${IMAGE_NAME}:latest
                 """
