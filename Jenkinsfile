@@ -32,7 +32,7 @@ pipeline {
 
                     docker run -d \
                         --name ${CONTAINER_NAME} \
-                        -p 3100:3100 \
+                        -p 3100:80 \
                         --restart=always \
                         ${IMAGE_NAME}:latest
                 """
