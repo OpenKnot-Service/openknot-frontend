@@ -16,8 +16,9 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { useProjectOutletContext } from '../components/layout/ProjectLayout';
+import { useApp } from '../contexts/AppContext';
 import { GitHubProvider, useGitHub } from '../contexts/GitHubContext';
-import { getDeploymentStatus, getMonitoringStatus, getUserById, currentUser } from '../lib/mockData';
+import { getDeploymentStatus, getMonitoringStatus, getUserById } from '../lib/mockData';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -104,7 +105,11 @@ function GitHubPageContent() {
     toggleFilePath,
     fileTreeState,
   } = useGitHub();
+  const { user } = useApp();
   const navigate = useNavigate();
+  const currentReviewerUsername = user?.githubUsername ?? user?.name ?? '게스트';
+  const currentUserAvatar = user?.avatar || user?.profileImageUrl;
+  const currentUserId = user?.id;
   const [selectedCommit, setSelectedCommit] = useState<GitHubCommit | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
@@ -455,8 +460,6 @@ function GitHubPageContent() {
   const handleCommentSidebarClose = () => {
     setIsCommentSidebarOpen(false);
   };
-
-  const currentReviewerUsername = currentUser.githubUsername ?? currentUser.name;
 
   const handleCreatePullRequest = (data: {
     title: string;
@@ -1137,7 +1140,7 @@ function GitHubPageContent() {
         labelOptions={issueLabelSuggestions}
         milestoneOptions={issueMilestones}
         currentUsername={currentReviewerUsername}
-        currentUserId={currentUser.id}
+        currentUserId={currentUserId}
         currentProject={project}
       />
 
@@ -1206,7 +1209,7 @@ function GitHubPageContent() {
           lineNumber={commentSidebarData.lineNumber}
           side={commentSidebarData.side}
           currentUsername={currentReviewerUsername}
-          currentUserAvatar={currentUser.avatar}
+          currentUserAvatar={currentUserAvatar}
           canAddComment={
             currentReviewerUsername === selectedPullRequest.author.username ||
             selectedPullRequest.reviewers.some((r) => r.username === currentReviewerUsername)

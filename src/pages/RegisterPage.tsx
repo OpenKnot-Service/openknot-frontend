@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Github, Mail, Lock, Eye, EyeOff, User, CheckCircle2 } from 'lucide-react'
 import { useToast } from '../contexts/ToastContext'
 import Button from '../components/ui/Button'
+import { ApiError, checkEmailExists, registerUser } from '../lib/apiClient'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
@@ -82,14 +83,27 @@ export default function RegisterPage() {
     setIsSubmitting(true)
 
     try {
-      // TODO: 실제 API 호출로 대체
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const emailExists = await checkEmailExists(formData.email).catch(() => false)
+      if (emailExists) {
+        setErrors((prev) => ({ ...prev, email: '이미 등록된 이메일입니다' }))
+        setIsSubmitting(false)
+        return
+      }
 
-      // 회원가입 성공 (목업)
+      await registerUser({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+      })
+
       showToast('회원가입이 완료되었습니다!', 'success')
       navigate('/login')
     } catch (error) {
-      showToast('회원가입에 실패했습니다. 다시 시도해주세요.', 'error')
+      if (error instanceof ApiError) {
+        showToast(error.message || '회원가입에 실패했습니다.', 'error')
+      } else {
+        showToast('회원가입에 실패했습니다. 다시 시도해주세요.', 'error')
+      }
     } finally {
       setIsSubmitting(false)
     }

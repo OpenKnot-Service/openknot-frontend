@@ -26,6 +26,11 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!user) {
+      showToast('로그인 후 프로젝트를 생성할 수 있습니다.', 'warning');
+      return;
+    }
+
     if (!formData.name.trim()) {
       showToast('프로젝트 이름을 입력해주세요', 'warning');
       return;
@@ -53,12 +58,12 @@ export default function CreateProjectModal({ isOpen, onClose }: CreateProjectMod
       id: `project-${Date.now()}`,
       name: formData.name.trim(),
       description: formData.description.trim(),
-      ownerId: user?.id || 'user-1',
+      ownerId: user.id,
       status: formData.status,
       visibility: 'public',
       members: [
         {
-          userId: user?.id || 'user-1',
+          userId: user.id,
           role: 'owner',
           position: '프로젝트 오너',
           joinedAt: new Date(),

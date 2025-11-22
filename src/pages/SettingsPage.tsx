@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
+import { useApp } from '../contexts/AppContext';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import UserAvatar from '../components/ui/UserAvatar';
@@ -22,7 +23,6 @@ import {
   Settings2,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { currentUser } from '../lib/mockData';
 import { SectionHeader } from '../components/ui/SectionHeader';
 
 type Language = 'ko' | 'en';
@@ -61,6 +61,7 @@ const notificationChannelOptions: Array<{
 const SettingsPage = () => {
   const { theme, setTheme } = useTheme();
   const { showToast } = useToast();
+  const { user, isUserLoading } = useApp();
 
   const [language, setLanguage] = useState<Language>('ko');
   const [timezone, setTimezone] = useState<(typeof timezoneOptions)[number]['value']>('Asia/Seoul');
@@ -111,10 +112,26 @@ const SettingsPage = () => {
   };
 
   const membershipDays = useMemo(() => {
-    if (!currentUser.createdAt) return '—';
-    const diff = Date.now() - currentUser.createdAt.getTime();
+    if (!user?.createdAt) return '—';
+    const diff = Date.now() - user.createdAt.getTime();
     return Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24)));
-  }, []);
+  }, [user]);
+
+  if (isUserLoading && !user) {
+    return (
+      <div className="max-w-4xl mx-auto p-4 md:p-6 text-gray-600 dark:text-gray-300">
+        사용자 정보를 불러오는 중입니다...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-4xl mx-auto p-4 md:p-6 text-gray-600 dark:text-gray-300">
+        사용자 정보가 없습니다. 다시 로그인해주세요.
+      </div>
+    );
+  }
 
   const workspaceStats = useMemo(
     () => [
@@ -141,11 +158,11 @@ const SettingsPage = () => {
         <div className="rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-purple-500 p-6 text-white shadow-lg lg:col-span-2">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <UserAvatar name={currentUser.name} size="lg" className="ring-2 ring-white/40" />
+              <UserAvatar name={user?.name ?? '사용자'} size="lg" className="ring-2 ring-white/40" />
               <div>
                 <p className="text-sm uppercase tracking-wide text-white/80">계정 소유자</p>
-                <h2 className="text-2xl font-semibold">{currentUser.name}</h2>
-                <p className="text-sm text-white/75">{currentUser.email}</p>
+                <h2 className="text-2xl font-semibold">{user?.name ?? '로그인이 필요합니다'}</h2>
+                <p className="text-sm text-white/75">{user?.email ?? ''}</p>
                 <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-xs text-white/80">
                   <User className="h-3.5 w-3.5" />
                   워크스페이스 관리자

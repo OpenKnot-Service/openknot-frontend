@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { useToast } from '../contexts/ToastContext';
-import { currentUser } from '../lib/mockData';
 import UserAvatar from '../components/ui/UserAvatar';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -11,24 +10,37 @@ import { Pencil, Github, Calendar, Award, CheckCircle2, Clock } from 'lucide-rea
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { projects, tasks } = useApp();
+  const { projects, tasks, user, isUserLoading } = useApp();
   const { showToast } = useToast();
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: currentUser.name,
-    email: currentUser.email,
-    bio: currentUser.bio || '',
-    role: currentUser.role,
-    skills: currentUser.skills,
-    githubUsername: currentUser.githubUsername || '',
+    name: user?.name ?? '',
+    email: user?.email ?? '',
+    bio: user?.bio || user?.description || '',
+    role: user?.role ?? 'developer',
+    skills: user?.skills ?? [],
+    githubUsername: user?.githubUsername || '',
   });
 
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name,
+        email: user.email,
+        bio: user.bio || user.description || '',
+        role: user.role ?? 'developer',
+        skills: user.skills ?? [],
+        githubUsername: user.githubUsername || '',
+      });
+    }
+  }, [user]);
+
   // 활동 통계 계산
-  const userProjects = projects.filter(p =>
-    p.members.some(m => m.userId === currentUser.id)
-  );
-  const userTasks = tasks.filter(t => t.assigneeId === currentUser.id);
+  const userProjects = user
+    ? projects.filter((p) => p.members.some((m) => m.userId === user.id))
+    : [];
+  const userTasks = user ? tasks.filter((t) => t.assigneeId === user.id) : [];
   const completedTasks = userTasks.filter(t => t.status === 'done');
   const inProgressTasks = userTasks.filter(t => t.status === 'in_progress');
 
@@ -36,6 +48,22 @@ const ProfilePage = () => {
   const recentTasks = [...userTasks]
     .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
     .slice(0, 5);
+
+  if (isUserLoading && !user) {
+    return (
+      <div className="max-w-6xl mx-auto p-4 md:p-6 text-gray-600 dark:text-gray-300">
+        사용자 정보를 불러오는 중입니다...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-6xl mx-auto p-4 md:p-6 text-gray-600 dark:text-gray-300">
+        사용자 정보가 없습니다. 다시 로그인해주세요.
+      </div>
+    );
+  }
 
   const handleSave = () => {
     // TODO: 백엔드 연동 시 실제 API 호출
@@ -64,7 +92,7 @@ const ProfilePage = () => {
         <div className="flex flex-col md:flex-row gap-6">
           {/* 아바타 */}
           <div className="flex flex-col items-center gap-2">
-            <UserAvatar name={currentUser.name} size="xl" />
+            <UserAvatar name={user.name} size="xl" />
             {isEditing && (
               <label className="cursor-pointer">
                 <input
@@ -93,12 +121,12 @@ const ProfilePage = () => {
                   />
                 ) : (
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {currentUser.name}
+                    {user.name}
                   </h1>
                 )}
                 {!isEditing && (
                   <p className="text-gray-600 dark:text-gray-400 mt-1">
-                    {currentUser.email}
+                    {user.email}
                   </p>
                 )}
               </div>
@@ -153,7 +181,7 @@ const ProfilePage = () => {
                 </>
               ) : (
                 <p className="text-gray-700 dark:text-gray-300">
-                  {currentUser.bio || '자기소개가 없습니다.'}
+                  {user.bio || user.description || '자기소개가 없습니다.'}
                 </p>
               )}
             </div>
@@ -176,9 +204,9 @@ const ProfilePage = () => {
                 </select>
               ) : (
                 <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm">
-                  {currentUser.role === 'developer' ? '개발자' :
-                   currentUser.role === 'designer' ? '디자이너' :
-                   currentUser.role === 'planner' ? '기획자' : '기타'}
+                  {user.role === 'developer' ? '개발자' :
+                   user.role === 'designer' ? '디자이너' :
+                   user.role === 'planner' ? '기획자' : '기타'}
                 </span>
               )}
             </div>
@@ -195,14 +223,18 @@ const ProfilePage = () => {
                   placeholder="GitHub 사용자명"
                 />
               ) : (
-                <a
-                  href={`https://github.com/${currentUser.githubUsername}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  @{currentUser.githubUsername}
-                </a>
+                user.githubUsername ? (
+                  <a
+                    href={`https://github.com/${user.githubUsername}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    @{user.githubUsername}
+                  </a>
+                ) : (
+                  <span className="text-gray-500 dark:text-gray-400">연동된 GitHub 계정이 없습니다</span>
+                )
               )}
             </div>
 
@@ -219,7 +251,7 @@ const ProfilePage = () => {
                 />
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  {currentUser.skills.map((skill) => (
+                  {(user.skills ?? []).map((skill) => (
                     <span
                       key={skill}
                       className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm"
@@ -291,7 +323,7 @@ const ProfilePage = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {Math.floor((Date.now() - currentUser.createdAt.getTime()) / (1000 * 60 * 60 * 24))}일
+                {Math.floor((Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24))}일
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 가입 기간
@@ -347,7 +379,7 @@ const ProfilePage = () => {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {userProjects.map((project) => {
-            const myRole = project.members.find(m => m.userId === currentUser.id)?.role;
+            const myRole = project.members.find(m => m.userId === user.id)?.role;
             const projectTasks = tasks.filter(t => t.projectId === project.id);
             const completedCount = projectTasks.filter(t => t.status === 'done').length;
             const progress = projectTasks.length > 0

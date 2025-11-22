@@ -28,13 +28,13 @@ import {
   getFileContent,
   searchFiles,
 } from '../lib/mockData';
-import { currentUser } from '../lib/mockData';
 import {
   canEditIssue,
   canDeleteIssue,
   canChangeIssueState,
   canManageIssueMetadata,
 } from '../utils/issuePermissions';
+import { useApp } from './AppContext';
 
 function cloneIssue(issue: GitHubIssue): GitHubIssue {
   return {
@@ -145,6 +145,10 @@ interface GitHubProviderProps {
 export function GitHubProvider({ children, projectId, project }: GitHubProviderProps) {
   // Load repositories for the project (memoize to prevent recreating array on every render)
   const repositories = useMemo(() => getRepositoriesByProjectId(projectId), [projectId]);
+  const { user } = useApp();
+  const currentUserId = user?.id ?? 'guest';
+  const currentUsername = user?.githubUsername ?? user?.name ?? '게스트';
+  const currentUserAvatar = user?.avatar || user?.profileImageUrl;
 
   // State management with lazy initialization for selectedRepoId
   const [selectedRepoId, setSelectedRepoId] = useState<string | null>(() => {
@@ -327,8 +331,8 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
         repositoryId: selectedRepository.id,
         repositoryName: selectedRepository.name,
         from: {
-          username: currentUser.githubUsername ?? currentUser.name,
-          avatarUrl: currentUser.avatar,
+          username: currentUsername,
+          avatarUrl: currentUserAvatar,
         },
         message,
         createdAt: new Date(),
@@ -338,7 +342,7 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
 
       setNotifications((prev) => [newNotification, ...prev]);
     },
-    [pullRequests, selectedRepository]
+    [pullRequests, selectedRepository, currentUsername, currentUserAvatar]
   );
 
   const selectRepository = useCallback((repoId: string) => {
@@ -378,8 +382,8 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
           body: input.body,
           state: input.state ?? 'open',
           author: {
-            username: currentUser.githubUsername ?? currentUser.name,
-            avatarUrl: currentUser.avatar,
+            username: currentUsername,
+            avatarUrl: currentUserAvatar,
           },
           assignees: input.assignees ?? [],
           labels: input.labels ?? [],
@@ -402,7 +406,7 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
 
       return created;
     },
-    [selectedRepository]
+    [selectedRepository, currentUsername, currentUserAvatar]
   );
 
   const updateIssue = useCallback(
@@ -411,8 +415,6 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
         return null;
       }
 
-      const currentUserId = currentUser.id;
-      const currentUsername = currentUser.githubUsername ?? currentUser.name;
       const repoId = selectedRepository.id;
       let updatedIssue: GitHubIssue | null = null;
 
@@ -501,7 +503,7 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
 
       return updatedIssue;
     },
-    [selectedRepository, project]
+    [selectedRepository, project, currentUserId, currentUsername]
   );
 
   const deleteIssue = useCallback(
@@ -509,8 +511,6 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
       if (!selectedRepository) {
         return;
       }
-
-      const currentUserId = currentUser.id;
 
       // Check permission: only admins can delete issues
       if (!canDeleteIssue(project, currentUserId)) {
@@ -525,7 +525,7 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
         return next;
       });
     },
-    [selectedRepository, project]
+    [selectedRepository, project, currentUserId]
   );
 
   const setIssueState = useCallback(
@@ -553,7 +553,7 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
           const now = new Date();
           const newComment: GitHubComment = {
             id: `issue-comment-${now.getTime()}-${Math.random()}`,
-            author: currentUser.githubUsername ?? currentUser.name,
+            author: currentUsername,
             body,
             createdAt: now,
             updatedAt: now,
@@ -577,7 +577,7 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
 
       return createdComment;
     },
-    [selectedRepository]
+    [selectedRepository, currentUsername]
   );
 
   const updateIssueComment = useCallback(
@@ -688,8 +688,8 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
           body: input.body,
           state: 'open',
           author: {
-            username: currentUser.githubUsername ?? currentUser.name,
-            avatarUrl: currentUser.avatar,
+            username: currentUsername,
+            avatarUrl: currentUserAvatar,
           },
           assignees: input.assignees,
           reviewers: input.reviewers.map((reviewer) => ({
@@ -730,7 +730,7 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
 
       return created;
     },
-    [selectedRepository, addNotification]
+    [selectedRepository, addNotification, currentUsername, currentUserAvatar]
   );
 
   const submitPullRequestReview = useCallback(
@@ -825,7 +825,7 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
         return updated;
       });
     },
-    [selectedRepository, addNotification]
+    [selectedRepository, addNotification, currentUsername]
   );
 
   const addLineComment = useCallback(
@@ -847,7 +847,6 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
         return;
       }
 
-      const currentUsername = currentUser.githubUsername ?? currentUser.name;
       const isAuthor = pr.author.username === currentUsername;
       const isReviewer = pr.reviewers.some(r => r.username === currentUsername);
 
@@ -869,8 +868,8 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
             filename,
             lineNumber,
             side,
-            reviewer: currentUser.githubUsername ?? currentUser.name,
-            reviewerAvatar: currentUser.avatar,
+            reviewer: currentUsername,
+            reviewerAvatar: currentUserAvatar,
             comment,
             createdAt: now,
           };
@@ -889,7 +888,7 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
           addNotification(
             'line_comment_added',
             prId,
-            `${currentUser.githubUsername ?? currentUser.name}님이 라인 코멘트를 추가했습니다`,
+            `${currentUsername}님이 라인 코멘트를 추가했습니다`,
             {
               filename,
               lineNumber,
@@ -900,7 +899,7 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
         return updated;
       });
     },
-    [selectedRepository, addNotification, pullRequests]
+    [selectedRepository, addNotification, pullRequests, currentUsername, currentUserAvatar]
   );
 
   const resolveLineComment = useCallback(
@@ -923,7 +922,7 @@ export function GitHubProvider({ children, projectId, project }: GitHubProviderP
                 ? {
                     ...c,
                     resolved: true,
-                    resolvedBy: currentUser.githubUsername ?? currentUser.name,
+                    resolvedBy: currentUsername,
                     resolvedAt: now,
                   }
                 : c

@@ -525,8 +525,6 @@ export const mockTemplates: Template[] = [
 ];
 
 // Current User (로그인된 사용자)
-export const currentUser = mockUsers[0];
-
 // Helper functions
 export function getProjectById(id: string): Project | undefined {
   return mockProjects.find((p) => p.id === id);

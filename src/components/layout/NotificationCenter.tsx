@@ -13,7 +13,9 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
   const { notifications, user, markNotificationAsRead, markAllNotificationsAsRead } = useApp();
   const [isClosing, setIsClosing] = useState(false);
 
-  const userNotifications = notifications.filter((n) => n.userId === user.id);
+  const userNotifications = user?.id
+    ? notifications.filter((n) => n.userId === user.id)
+    : [];
   const unreadCount = userNotifications.filter((n) => !n.read).length;
 
   // isOpen이 변경될 때 isClosing 초기화

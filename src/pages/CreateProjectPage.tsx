@@ -153,6 +153,11 @@ export default function CreateProjectPage() {
   };
 
   const handleCreate = async () => {
+    if (!user) {
+      showToast('로그인 후 프로젝트를 생성할 수 있습니다.', 'warning');
+      return;
+    }
+
     setIsCreating(true);
 
     try {

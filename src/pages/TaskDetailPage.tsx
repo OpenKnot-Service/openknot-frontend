@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { useToast } from '../contexts/ToastContext';
-import { currentUser, getUserById } from '../lib/mockData';
+import { getUserById } from '../lib/mockData';
 import { Comment, Subtask, FileAttachment, ActivityLog } from '../types';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -131,7 +131,7 @@ const mockActivityLogs: ActivityLog[] = [
 const TaskDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { tasks, projects, updateTask, deleteTask } = useApp();
+  const { tasks, projects, updateTask, deleteTask, user } = useApp();
   const { showToast } = useToast();
 
   const task = tasks.find((t) => t.id === id);
@@ -201,11 +201,15 @@ const TaskDetailPage = () => {
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
+    if (!user) {
+      showToast('로그인 후 댓글을 추가해주세요.', 'warning');
+      return;
+    }
 
     const comment: Comment = {
       id: `comment-${Date.now()}`,
       taskId: task.id,
-      userId: currentUser.id,
+      userId: user.id,
       content: newComment,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -246,6 +250,10 @@ const TaskDetailPage = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = e.target.files;
     if (!uploadedFiles) return;
+    if (!user) {
+      showToast('로그인 후 파일을 업로드할 수 있습니다.', 'warning');
+      return;
+    }
 
     const newFiles: FileAttachment[] = Array.from(uploadedFiles).map((file) => ({
       id: `file-${Date.now()}-${file.name}`,
@@ -254,7 +262,7 @@ const TaskDetailPage = () => {
       size: file.size,
       type: file.type,
       url: URL.createObjectURL(file),
-      uploadedBy: currentUser.id,
+      uploadedBy: user.id,
       uploadedAt: new Date(),
     }));
 
@@ -547,7 +555,7 @@ const TaskDetailPage = () => {
             </div>
 
             <div className="flex gap-2">
-              <UserAvatar name={currentUser.name} size="sm" />
+              <UserAvatar name={user?.name ?? '게스트'} size="sm" />
               <div className="flex-1 flex gap-2">
                 <textarea
                   value={newComment}

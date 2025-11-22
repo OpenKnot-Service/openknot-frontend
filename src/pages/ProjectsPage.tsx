@@ -12,8 +12,9 @@ export default function ProjectsPage() {
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
 
   const userProjects = useMemo(() => {
+    if (!user?.id) return projects;
     return projects.filter((p) => p.members.some((m) => m.userId === user.id));
-  }, [projects, user.id]);
+  }, [projects, user?.id]);
 
   const filteredProjects = useMemo(() => {
     let filtered = userProjects;

@@ -3,6 +3,10 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
+  profileImageUrl?: string;
+  description?: string;
+  githubLink?: string;
+  githubId?: number;
   role: 'developer' | 'designer' | 'planner' | 'other';
   skills: string[];
   bio?: string;

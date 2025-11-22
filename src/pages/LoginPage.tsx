@@ -3,10 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Github, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { useToast } from '../contexts/ToastContext'
 import Button from '../components/ui/Button'
+import { useApp } from '../contexts/AppContext'
+import { ApiError, buildGithubOAuthUrl } from '../lib/apiClient'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
+  const { login, accessToken } = useApp()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -47,21 +50,26 @@ export default function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      // TODO: 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // 로그인 성공 (목업)
-      showToast('로그인에 성공했습니다', 'success')
+      await login(formData.email, formData.password)
+      showToast('로그인에 성공했습니다.', 'success')
       navigate('/dashboard')
     } catch (error) {
-      showToast('로그인에 실패했습니다. 다시 시도해주세요.', 'error')
+      if (error instanceof ApiError) {
+        showToast(error.message || '로그인에 실패했습니다.', 'error')
+      } else {
+        showToast('로그인에 실패했습니다. 다시 시도해주세요.', 'error')
+      }
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleGithubLogin = () => {
-    showToast('GitHub 로그인 기능은 준비 중입니다', 'info')
+    if (!accessToken) {
+      showToast('이메일 로그인 후 GitHub OAuth를 진행해주세요.', 'warning')
+      return
+    }
+    window.location.href = buildGithubOAuthUrl()
   }
 
   const handleGoogleLogin = () => {
