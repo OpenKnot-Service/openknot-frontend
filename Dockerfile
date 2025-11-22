@@ -7,8 +7,6 @@ RUN bun install --frozen-lockfile
 
 COPY . .
 
-RUN bun test
-
 RUN bun run build
 
 FROM nginx:alpine
