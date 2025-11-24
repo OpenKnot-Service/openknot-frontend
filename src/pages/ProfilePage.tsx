@@ -135,24 +135,25 @@ const ProfilePage = () => {
         Authorization: `Bearer ${accessToken}`,
       },
       credentials: 'include',
-      redirect: 'manual' as RequestRedirect,
     })
-      .then((response) => {
-        const redirectLocation =
-          response.headers.get('Location') ||
-          (response.type === 'opaqueredirect' && response.url ? response.url : null);
-
-        if (redirectLocation) {
-          popup.location.href = redirectLocation;
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('oauth_request_failed');
+        }
+        const data = await response.json().catch(() => null);
+        if (data?.url) {
+          popup.location.href = data.url;
           return;
         }
 
-        showToast('GitHub 인증 페이지로 이동하지 못했습니다. 팝업/네트워크 설정을 확인해주세요.', 'error');
-        popup.close();
-        setIsLinkingGithub(false);
+        throw new Error('oauth_url_missing');
       })
-      .catch(() => {
-        showToast('GitHub 인증 페이지로 이동 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+      .catch((error) => {
+        if (error instanceof Error && error.message === 'oauth_url_missing') {
+          showToast('GitHub 인증 페이지로 이동하지 못했습니다.', 'error');
+        } else {
+          showToast('GitHub 인증 페이지로 이동 중 오류가 발생했습니다.', 'error');
+        }
         popup.close();
         setIsLinkingGithub(false);
       });
