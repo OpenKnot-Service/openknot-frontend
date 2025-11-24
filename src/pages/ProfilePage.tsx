@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { useToast } from '../contexts/ToastContext';
 import UserAvatar from '../components/ui/UserAvatar';
@@ -7,10 +7,12 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import TagInput from '../components/ui/TagInput';
 import { Pencil, Github, Calendar, Award, CheckCircle2, Clock } from 'lucide-react';
+import { buildGithubOAuthUrl } from '../lib/apiClient';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const { projects, tasks, user, isUserLoading } = useApp();
+  const location = useLocation();
+  const { projects, tasks, user, isUserLoading, refreshUser } = useApp();
   const { showToast } = useToast();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -20,8 +22,10 @@ const ProfilePage = () => {
     bio: user?.bio || user?.description || '',
     role: user?.role ?? 'developer',
     skills: user?.skills ?? [],
-    githubUsername: user?.githubUsername || '',
   });
+  const [isLinkingGithub, setIsLinkingGithub] = useState(false);
+
+  const githubCheckIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -31,10 +35,31 @@ const ProfilePage = () => {
         bio: user.bio || user.description || '',
         role: user.role ?? 'developer',
         skills: user.skills ?? [],
-        githubUsername: user.githubUsername || '',
       });
     }
   }, [user]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const githubLinked = params.get('githubLinked');
+    if (githubLinked === 'success') {
+      refreshUser();
+      showToast('GitHub 계정이 연동되었습니다.', 'success');
+      navigate(location.pathname, { replace: true });
+    } else if (githubLinked === 'error') {
+      const reason = params.get('reason');
+      showToast(reason || 'GitHub 연동에 실패했습니다. 다시 시도해주세요.', 'error');
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.pathname, location.search, navigate, refreshUser, showToast]);
+
+  useEffect(() => {
+    return () => {
+      if (githubCheckIntervalRef.current) {
+        window.clearInterval(githubCheckIntervalRef.current);
+      }
+    };
+  }, []);
 
   // 활동 통계 계산
   const userProjects = user
@@ -83,6 +108,48 @@ const ProfilePage = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleGithubConnect = () => {
+    if (!user) return;
+
+    const oauthUrl = buildGithubOAuthUrl();
+    const popup = window.open(oauthUrl, 'github-oauth', 'width=1024,height=800');
+
+    if (!popup) {
+      showToast('팝업이 차단되어 새 창으로 이동합니다.', 'info');
+      window.location.href = oauthUrl;
+      return;
+    }
+
+    const previousGithub = user.githubUsername;
+    setIsLinkingGithub(true);
+
+    githubCheckIntervalRef.current = window.setInterval(async () => {
+      if (popup.closed) {
+        if (githubCheckIntervalRef.current) {
+          window.clearInterval(githubCheckIntervalRef.current);
+          githubCheckIntervalRef.current = null;
+        }
+
+        try {
+          const refreshed = await refreshUser();
+          if (refreshed?.githubUsername) {
+            const isNewAccount = previousGithub !== refreshed.githubUsername;
+            showToast(
+              isNewAccount ? 'GitHub 계정이 새로 연동되었습니다.' : 'GitHub 계정 정보가 갱신되었습니다.',
+              'success'
+            );
+          } else {
+            showToast('GitHub 연동이 완료되지 않았습니다. 다시 시도해주세요.', 'warning');
+          }
+        } catch (error) {
+          showToast('GitHub 연동 상태를 확인하는 중 오류가 발생했습니다.', 'error');
+        } finally {
+          setIsLinkingGithub(false);
+        }
+      }
+    }, 1000);
   };
 
   return (
@@ -212,29 +279,41 @@ const ProfilePage = () => {
             </div>
 
             {/* GitHub */}
-            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <Github className="w-5 h-5" />
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={formData.githubUsername}
-                  onChange={(e) => setFormData({ ...formData, githubUsername: e.target.value })}
-                  className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  placeholder="GitHub 사용자명"
-                />
-              ) : (
-                user.githubUsername ? (
-                  <a
-                    href={`https://github.com/${user.githubUsername}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    @{user.githubUsername}
-                  </a>
-                ) : (
-                  <span className="text-gray-500 dark:text-gray-400">연동된 GitHub 계정이 없습니다</span>
-                )
+            <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Github className="w-5 h-5" />
+                <div className="flex flex-col">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">GitHub 연동</span>
+                  {user.githubUsername ? (
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`https://github.com/${user.githubUsername}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-blue-400 hover:underline truncate"
+                      >
+                        @{user.githubUsername}
+                      </a>
+                      <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                        연동됨
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-gray-500 dark:text-gray-400">
+                      연동된 GitHub 계정이 없습니다
+                    </span>
+                  )}
+                </div>
+              </div>
+              {isEditing && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  loading={isLinkingGithub}
+                  onClick={handleGithubConnect}
+                >
+                  {user.githubUsername ? 'GitHub 재연동' : 'GitHub 연동'}
+                </Button>
               )}
             </div>
 
