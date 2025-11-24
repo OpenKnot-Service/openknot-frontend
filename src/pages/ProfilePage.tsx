@@ -119,10 +119,8 @@ const ProfilePage = () => {
 
     const oauthUrl = buildGithubOAuthUrl();
     const popup = window.open('', 'github-oauth', 'width=1024,height=800');
-
     if (!popup) {
-      showToast('팝업이 차단되어 새 창으로 이동합니다.', 'info');
-      window.location.href = `${oauthUrl}?token=${encodeURIComponent(accessToken)}`;
+      showToast('팝업이 차단되었습니다. 브라우저 팝업을 허용한 뒤 다시 시도해주세요.', 'warning');
       return;
     }
 
@@ -142,12 +140,21 @@ const ProfilePage = () => {
       .then((response) => {
         const redirectLocation =
           response.headers.get('Location') ||
-          (response.type === 'opaqueredirect' ? response.url : null) ||
-          oauthUrl;
-        popup.location.href = redirectLocation;
+          (response.type === 'opaqueredirect' && response.url ? response.url : null);
+
+        if (redirectLocation) {
+          popup.location.href = redirectLocation;
+          return;
+        }
+
+        showToast('GitHub 인증 페이지로 이동하지 못했습니다. 팝업/네트워크 설정을 확인해주세요.', 'error');
+        popup.close();
+        setIsLinkingGithub(false);
       })
       .catch(() => {
-        popup.location.href = `${oauthUrl}?token=${encodeURIComponent(accessToken)}`;
+        showToast('GitHub 인증 페이지로 이동 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+        popup.close();
+        setIsLinkingGithub(false);
       });
 
     githubCheckIntervalRef.current = window.setInterval(async () => {
