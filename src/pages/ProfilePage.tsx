@@ -117,15 +117,45 @@ const ProfilePage = () => {
       return;
     }
 
-    const oauthUrl = `${buildGithubOAuthUrl()}?token=${encodeURIComponent(accessToken)}`;
-    const popup = window.open(oauthUrl, 'github-oauth', 'width=1024,height=800');
+    const oauthUrl = buildGithubOAuthUrl();
+    const popup = window.open('', 'github-oauth', 'width=1024,height=800');
     if (!popup) {
       showToast('팝업이 차단되었습니다. 브라우저 팝업을 허용한 뒤 다시 시도해주세요.', 'warning');
       return;
     }
 
+    popup.document.write('<p style="font-family: sans-serif; padding: 16px;">GitHub로 이동 중...</p>');
+
     const previousGithub = user.githubUsername;
     setIsLinkingGithub(true);
+
+    fetch(oauthUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      credentials: 'include',
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('oauth_request_failed');
+        }
+        const data = await response.json().catch(() => null);
+        if (data?.url) {
+          popup.location.href = data.url;
+          return;
+        }
+        throw new Error('oauth_url_missing');
+      })
+      .catch((error) => {
+        if (error instanceof Error && error.message === 'oauth_url_missing') {
+          showToast('GitHub 인증 페이지로 이동하지 못했습니다.', 'error');
+        } else {
+          showToast('GitHub 인증 페이지로 이동 중 오류가 발생했습니다.', 'error');
+        }
+        popup.close();
+        setIsLinkingGithub(false);
+      });
 
     githubCheckIntervalRef.current = window.setInterval(async () => {
       if (popup.closed) {
