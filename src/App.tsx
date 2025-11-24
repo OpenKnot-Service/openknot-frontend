@@ -9,6 +9,8 @@ import ProjectLayout from './components/layout/ProjectLayout';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import DashboardSkeleton from './components/ui/skeletons/DashboardSkeleton';
 import PWAInstallPrompt from './components/ui/PWAInstallPrompt';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { PublicOnlyRoute } from './components/auth/PublicOnlyRoute';
 
 // Lazy load pages for code splitting
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -39,21 +41,25 @@ function App() {
             <BrowserRouter>
               <Suspense fallback={<DashboardSkeleton />}>
                 <Routes>
-                  {/* Onboarding Pages */}
+                  {/* Public Pages */}
                   <Route path="/" element={<HomePage />} />
                   <Route path="/features" element={<FeaturesPage />} />
                   <Route path="/pricing" element={<PricingPage />} />
 
-                  {/* Auth Pages */}
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
+                  {/* Auth Pages - Redirect to dashboard if already logged in */}
+                  <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
+                  <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
 
-                  {/* App Pages */}
+                  {/* App Pages with MainLayout */}
                   <Route element={<MainLayout />}>
-                    <Route path="/dashboard" element={<DashboardPage />} />
-                    <Route path="/projects" element={<ProjectsPage />} />
-                    <Route path="/projects/new" element={<CreateProjectPage />} />
-                    <Route path="/projects/:id" element={<ProjectLayout />}>
+                    {/* Public page with layout */}
+                    <Route path="/explore" element={<ExplorePage />} />
+
+                    {/* Protected pages */}
+                    <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                    <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
+                    <Route path="/projects/new" element={<ProtectedRoute><CreateProjectPage /></ProtectedRoute>} />
+                    <Route path="/projects/:id" element={<ProtectedRoute><ProjectLayout /></ProtectedRoute>}>
                       <Route index element={<ProjectDetailPage />} />
                       <Route path="github" element={<GitHubPage />} />
                       <Route path="deployment" element={<DeploymentPage />} />
@@ -61,10 +67,9 @@ function App() {
                       <Route path="security" element={<SecurityPage />} />
                       <Route path="settings" element={<ProjectSettingsPage />} />
                     </Route>
-                    <Route path="/tasks/:id" element={<TaskDetailPage />} />
-                    <Route path="/explore" element={<ExplorePage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/tasks/:id" element={<ProtectedRoute><TaskDetailPage /></ProtectedRoute>} />
+                    <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                    <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
                   </Route>
 
                   <Route path="*" element={<Navigate to="/" replace />} />

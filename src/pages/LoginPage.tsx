@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Github, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { useToast } from '../contexts/ToastContext'
 import Button from '../components/ui/Button'
@@ -8,6 +8,7 @@ import { ApiError, buildGithubOAuthUrl } from '../lib/apiClient'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { showToast } = useToast()
   const { login, accessToken } = useApp()
 
@@ -52,7 +53,10 @@ export default function LoginPage() {
     try {
       await login(formData.email, formData.password)
       showToast('로그인에 성공했습니다.', 'success')
-      navigate('/dashboard')
+
+      // Redirect to the original intended page or dashboard
+      const redirectTo = searchParams.get('redirect') || '/dashboard'
+      navigate(redirectTo)
     } catch (error) {
       if (error instanceof ApiError) {
         showToast(error.message || '로그인에 실패했습니다.', 'error')

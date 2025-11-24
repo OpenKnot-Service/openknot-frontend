@@ -11,7 +11,7 @@ interface HeaderProps {
 
 export default function Header({ onSearchClick }: HeaderProps) {
   const navigate = useNavigate();
-  const { unreadNotificationsCount, isNotificationCenterOpen, setIsNotificationCenterOpen } = useApp();
+  const { user, unreadNotificationsCount, isNotificationCenterOpen, setIsNotificationCenterOpen } = useApp();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -29,54 +29,99 @@ export default function Header({ onSearchClick }: HeaderProps) {
 
             {/* Desktop Navigation */}
             <nav className="hidden items-center gap-6 md:flex">
-              <Link
-                to="/dashboard"
-                className="text-[color:var(--subtle-foreground)] transition-colors hover:text-[color:var(--foreground)]"
-              >
-                대시보드
-              </Link>
-              <Link
-                to="/projects"
-                className="text-[color:var(--subtle-foreground)] transition-colors hover:text-[color:var(--foreground)]"
-              >
-                프로젝트
-              </Link>
-              <Link
-                to="/explore"
-                className="text-[color:var(--subtle-foreground)] transition-colors hover:text-[color:var(--foreground)]"
-              >
-                둘러보기
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="text-[color:var(--subtle-foreground)] transition-colors hover:text-[color:var(--foreground)]"
+                  >
+                    대시보드
+                  </Link>
+                  <Link
+                    to="/projects"
+                    className="text-[color:var(--subtle-foreground)] transition-colors hover:text-[color:var(--foreground)]"
+                  >
+                    프로젝트
+                  </Link>
+                  <Link
+                    to="/explore"
+                    className="text-[color:var(--subtle-foreground)] transition-colors hover:text-[color:var(--foreground)]"
+                  >
+                    둘러보기
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/explore"
+                    className="text-[color:var(--subtle-foreground)] transition-colors hover:text-[color:var(--foreground)]"
+                  >
+                    둘러보기
+                  </Link>
+                  <Link
+                    to="/features"
+                    className="text-[color:var(--subtle-foreground)] transition-colors hover:text-[color:var(--foreground)]"
+                  >
+                    기능
+                  </Link>
+                  <Link
+                    to="/pricing"
+                    className="text-[color:var(--subtle-foreground)] transition-colors hover:text-[color:var(--foreground)]"
+                  >
+                    가격
+                  </Link>
+                </>
+              )}
             </nav>
 
             {/* Right Section */}
             <div className="flex items-center gap-1 md:gap-2">
-              <button
-                onClick={onSearchClick}
-                className="hidden rounded-full p-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)] sm:flex"
-                title="검색 (Cmd+K)"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setIsNotificationCenterOpen(true)}
-                className="relative rounded-full p-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
-              >
-                <Bell className="w-5 h-5" />
-                {unreadNotificationsCount > 0 && (
-                  <span className="absolute right-1.5 top-1.5 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-[color:var(--danger)] px-1 text-[9px] font-semibold text-[color:var(--danger-foreground)] shadow-sm">
-                    {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
-                  </span>
-                )}
-              </button>
-              <ThemeToggle />
-              <button
-                onClick={() => navigate('/profile')}
-                className="hidden rounded-full p-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)] sm:flex"
-                title="프로필"
-              >
-                <User className="w-5 h-5" />
-              </button>
+              {user ? (
+                <>
+                  <button
+                    onClick={onSearchClick}
+                    className="hidden rounded-full p-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)] sm:flex"
+                    title="검색 (Cmd+K)"
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setIsNotificationCenterOpen(true)}
+                    className="relative rounded-full p-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
+                  >
+                    <Bell className="w-5 h-5" />
+                    {unreadNotificationsCount > 0 && (
+                      <span className="absolute right-1.5 top-1.5 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-[color:var(--danger)] px-1 text-[9px] font-semibold text-[color:var(--danger-foreground)] shadow-sm">
+                        {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                      </span>
+                    )}
+                  </button>
+                  <ThemeToggle />
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="hidden rounded-full p-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)] sm:flex"
+                    title="프로필"
+                  >
+                    <User className="w-5 h-5" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <ThemeToggle />
+                  <Link
+                    to="/login"
+                    className="hidden rounded-lg px-4 py-2 text-sm font-medium text-[color:var(--subtle-foreground)] transition-colors hover:text-[color:var(--foreground)] sm:flex"
+                  >
+                    로그인
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="hidden rounded-lg bg-[color:var(--primary)] px-4 py-2 text-sm font-medium text-[color:var(--primary-foreground)] transition-colors hover:bg-[color:var(--primary)]/90 sm:flex"
+                  >
+                    회원가입
+                  </Link>
+                </>
+              )}
 
               {/* Mobile Menu Button */}
               <button
@@ -92,45 +137,87 @@ export default function Header({ onSearchClick }: HeaderProps) {
           {isMobileMenuOpen && (
             <nav className="border-t border-[color:var(--border)] py-4 md:hidden">
               <div className="flex flex-col space-y-2.5">
-                <Link
-                  to="/dashboard"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="rounded-lg px-3 py-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
-                >
-                  대시보드
-                </Link>
-                <Link
-                  to="/projects"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="rounded-lg px-3 py-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
-                >
-                  프로젝트
-                </Link>
-                <Link
-                  to="/explore"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="rounded-lg px-3 py-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
-                >
-                  둘러보기
-                </Link>
-                <button
-                  onClick={() => {
-                    onSearchClick?.();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="sm:hidden rounded-lg px-3 py-2 text-left text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
-                >
-                  검색
-                </button>
-                <button
-                  onClick={() => {
-                    navigate('/profile');
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="sm:hidden rounded-lg px-3 py-2 text-left text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
-                >
-                  프로필
-                </button>
+                {user ? (
+                  <>
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="rounded-lg px-3 py-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
+                    >
+                      대시보드
+                    </Link>
+                    <Link
+                      to="/projects"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="rounded-lg px-3 py-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
+                    >
+                      프로젝트
+                    </Link>
+                    <Link
+                      to="/explore"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="rounded-lg px-3 py-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
+                    >
+                      둘러보기
+                    </Link>
+                    <button
+                      onClick={() => {
+                        onSearchClick?.();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="sm:hidden rounded-lg px-3 py-2 text-left text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
+                    >
+                      검색
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate('/profile');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="sm:hidden rounded-lg px-3 py-2 text-left text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
+                    >
+                      프로필
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/explore"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="rounded-lg px-3 py-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
+                    >
+                      둘러보기
+                    </Link>
+                    <Link
+                      to="/features"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="rounded-lg px-3 py-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
+                    >
+                      기능
+                    </Link>
+                    <Link
+                      to="/pricing"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="rounded-lg px-3 py-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
+                    >
+                      가격
+                    </Link>
+                    <Link
+                      to="/login"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="rounded-lg px-3 py-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
+                    >
+                      로그인
+                    </Link>
+                    <Link
+                      to="/register"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="rounded-lg bg-[color:var(--primary)] px-3 py-2 text-center text-[color:var(--primary-foreground)] transition-colors hover:bg-[color:var(--primary)]/90"
+                    >
+                      회원가입
+                    </Link>
+                  </>
+                )}
               </div>
             </nav>
           )}
