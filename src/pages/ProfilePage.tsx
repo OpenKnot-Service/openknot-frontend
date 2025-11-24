@@ -12,7 +12,7 @@ import { buildGithubOAuthUrl } from '../lib/apiClient';
 const ProfilePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { projects, tasks, user, isUserLoading, refreshUser } = useApp();
+  const { projects, tasks, user, isUserLoading, refreshUser, accessToken } = useApp();
   const { showToast } = useToast();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -112,18 +112,43 @@ const ProfilePage = () => {
 
   const handleGithubConnect = () => {
     if (!user) return;
-
-    const oauthUrl = buildGithubOAuthUrl();
-    const popup = window.open(oauthUrl, 'github-oauth', 'width=1024,height=800');
-
-    if (!popup) {
-      showToast('팝업이 차단되어 새 창으로 이동합니다.', 'info');
-      window.location.href = oauthUrl;
+    if (!accessToken) {
+      showToast('로그인 세션이 만료되었습니다. 다시 로그인 후 GitHub 연동을 시도해주세요.', 'warning');
       return;
     }
 
+    const oauthUrl = buildGithubOAuthUrl();
+    const popup = window.open('', 'github-oauth', 'width=1024,height=800');
+
+    if (!popup) {
+      showToast('팝업이 차단되어 새 창으로 이동합니다.', 'info');
+      window.location.href = `${oauthUrl}?token=${encodeURIComponent(accessToken)}`;
+      return;
+    }
+
+    popup.document.write('<p style="font-family: sans-serif; padding: 16px;">GitHub로 이동 중...</p>');
+
     const previousGithub = user.githubUsername;
     setIsLinkingGithub(true);
+
+    fetch(oauthUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      credentials: 'include',
+      redirect: 'manual' as RequestRedirect,
+    })
+      .then((response) => {
+        const redirectLocation =
+          response.headers.get('Location') ||
+          (response.type === 'opaqueredirect' ? response.url : null) ||
+          oauthUrl;
+        popup.location.href = redirectLocation;
+      })
+      .catch(() => {
+        popup.location.href = `${oauthUrl}?token=${encodeURIComponent(accessToken)}`;
+      });
 
     githubCheckIntervalRef.current = window.setInterval(async () => {
       if (popup.closed) {
