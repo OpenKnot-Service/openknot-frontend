@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, User, Search, Menu, X } from 'lucide-react';
+import { Bell, User, Search, Menu, X, LogOut } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import NotificationCenter from './NotificationCenter';
 import ThemeToggle from '../ui/ThemeToggle';
@@ -11,7 +11,7 @@ interface HeaderProps {
 
 export default function Header({ onSearchClick }: HeaderProps) {
   const navigate = useNavigate();
-  const { user, unreadNotificationsCount, isNotificationCenterOpen, setIsNotificationCenterOpen } = useApp();
+  const { user, logout, unreadNotificationsCount, isNotificationCenterOpen, setIsNotificationCenterOpen } = useApp();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -104,6 +104,13 @@ export default function Header({ onSearchClick }: HeaderProps) {
                   >
                     <User className="w-5 h-5" />
                   </button>
+                  <button
+                    onClick={logout}
+                    className="hidden rounded-full p-2 text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)] sm:flex"
+                    title="로그아웃"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
                 </>
               ) : (
                 <>
@@ -177,6 +184,15 @@ export default function Header({ onSearchClick }: HeaderProps) {
                       className="sm:hidden rounded-lg px-3 py-2 text-left text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
                     >
                       프로필
+                    </button>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="sm:hidden rounded-lg px-3 py-2 text-left text-[color:var(--subtle-foreground)] transition-colors hover:bg-[color:var(--accent)] hover:text-[color:var(--foreground)]"
+                    >
+                      로그아웃
                     </button>
                   </>
                 ) : (

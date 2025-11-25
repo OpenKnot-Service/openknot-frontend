@@ -42,7 +42,7 @@ function App() {
               <Suspense fallback={<DashboardSkeleton />}>
                 <Routes>
                   {/* Public Pages */}
-                  <Route path="/" element={<HomePage />} />
+                  <Route path="/" element={<PublicOnlyRoute><HomePage /></PublicOnlyRoute>} />
                   <Route path="/features" element={<FeaturesPage />} />
                   <Route path="/pricing" element={<PricingPage />} />
 
