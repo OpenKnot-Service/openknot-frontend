@@ -323,10 +323,10 @@ export function isStepOptional(step: RegistrationStep): boolean {
 export function getStepTitle(step: RegistrationStep): string {
   const titles: Record<RegistrationStep, string> = {
     1: '기본 정보',
-    2: '역할 선택',
-    3: '스킬 & 기술스택',
-    4: '프로필 정보',
-    5: '검토 & 확인',
+    2: '역할 & 경력',
+    3: '스킬 & 관심 분야',
+    4: '프로필 & 소셜',
+    5: '검토 & 완료',
   };
   return titles[step];
 }
@@ -337,9 +337,9 @@ export function getStepTitle(step: RegistrationStep): string {
 export function getStepDescription(step: RegistrationStep): string {
   const descriptions: Record<RegistrationStep, string> = {
     1: '계정 생성을 위한 기본 정보를 입력해주세요',
-    2: '당신의 전문 분야와 경력을 알려주세요',
-    3: '보유하고 있는 기술 스택을 선택해주세요 (선택 사항)',
-    4: '프로필을 더욱 풍성하게 만들어보세요 (선택 사항)',
+    2: '프로젝트 매칭 향상을 위해 역할과 경력을 알려주세요',
+    3: '보유 스킬과 관심 분야로 추천을 강화하세요 (선택 사항)',
+    4: '프로필과 링크를 추가해 신뢰도를 높이세요 (선택 사항)',
     5: '추가 정보를 확인하고 등록을 완료하세요',
   };
   return descriptions[step];

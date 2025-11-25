@@ -19,6 +19,8 @@ interface RegistrationWizardLayoutProps {
   nextButtonText?: string;
   skipButtonText?: string;
   onSkip?: () => void;
+  loggedInUserEmail?: string;
+  showCancelButton?: boolean;
 }
 
 export default function RegistrationWizardLayout({
@@ -37,6 +39,8 @@ export default function RegistrationWizardLayout({
   nextButtonText,
   skipButtonText,
   onSkip,
+  loggedInUserEmail,
+  showCancelButton = true,
 }: RegistrationWizardLayoutProps) {
   const isLastStep = currentStep === totalSteps;
 
@@ -46,7 +50,7 @@ export default function RegistrationWizardLayout({
         {/* Header */}
         <div className="max-w-4xl mx-auto mb-8">
           <div className="flex items-center justify-between gap-4">
-            <div>
+            <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 회원가입
               </h1>
@@ -54,13 +58,22 @@ export default function RegistrationWizardLayout({
                 OpenKnot에서 함께 프로젝트를 시작하세요
               </p>
             </div>
-            <button
-              onClick={onCancel}
-              className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0"
-              title="취소"
-            >
-              <X className="w-6 h-6" />
-            </button>
+            <div className="flex items-center gap-3">
+              {loggedInUserEmail && (
+                <div className="px-3 py-1.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200 text-sm font-medium">
+                  로그인됨 · {loggedInUserEmail}
+                </div>
+              )}
+              {showCancelButton && (
+                <button
+                  onClick={onCancel}
+                  className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex-shrink-0"
+                  title="취소"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -106,13 +119,11 @@ export default function RegistrationWizardLayout({
                 </Button>
               )}
 
-              <Button
-                variant="secondary"
-                onClick={onCancel}
-                disabled={isLoading}
-              >
-                취소
-              </Button>
+              {showCancelButton && (
+                <Button variant="secondary" onClick={onCancel} disabled={isLoading}>
+                  취소
+                </Button>
+              )}
 
               {showNext && (
                 <Button
@@ -126,7 +137,7 @@ export default function RegistrationWizardLayout({
                       {isLastStep ? (
                         <>
                           <Check className="w-4 h-4 mr-2" />
-                          계정 생성
+                          완료
                         </>
                       ) : (
                         <>

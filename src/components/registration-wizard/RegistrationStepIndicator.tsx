@@ -10,10 +10,10 @@ interface StepInfo {
 
 const STEPS: StepInfo[] = [
   { number: 1, title: '기본 정보', description: '계정 정보' },
-  { number: 2, title: '역할 선택', description: '전문 분야' },
-  { number: 3, title: '스킬 & 기술스택', description: '보유 기술', optional: true },
-  { number: 4, title: '프로필 정보', description: '소셜 링크', optional: true },
-  { number: 5, title: '검토 & 확인', description: '최종 검토' },
+  { number: 2, title: '역할 & 경력', description: '추가 정보 1단계' },
+  { number: 3, title: '스킬 & 기술스택', description: '추가 정보 2단계', optional: true },
+  { number: 4, title: '프로필 정보', description: '추가 정보 3단계', optional: true },
+  { number: 5, title: '검토 & 완료', description: '최종 검토' },
 ];
 
 interface RegistrationStepIndicatorProps {

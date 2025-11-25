@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ShieldCheck, Sparkles } from 'lucide-react';
 import {
   RegistrationStep,
   RegistrationFormData,
@@ -58,6 +59,51 @@ const AVAILABLE_TECH: TechStackItem[] = [
   { id: 'tailwind', name: 'Tailwind CSS', category: 'frontend' },
 ];
 
+interface PostSignupPromptProps {
+  email: string;
+  onContinue: () => void;
+  onSkip: () => void;
+}
+
+function PostSignupPrompt({ email, onContinue, onSkip }: PostSignupPromptProps) {
+  return (
+    <div className="text-center space-y-6 py-10">
+      <div className="mx-auto w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-300">
+        <ShieldCheck className="w-10 h-10" />
+      </div>
+      <div>
+        <p className="text-sm uppercase tracking-wide text-blue-500 font-semibold mb-2">
+          회원가입 완료
+        </p>
+        <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          {email} 계정이 생성되었습니다!
+        </h3>
+        <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          역할·스킬·프로필 정보를 추가로 입력하면 팀 추천과 프로젝트 매칭이 더욱 정확해집니다.
+          계속 진행하시겠습니까?
+        </p>
+      </div>
+      <div className="flex flex-wrap justify-center gap-4">
+        <button
+          type="button"
+          onClick={onContinue}
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold shadow-lg shadow-blue-500/30 flex items-center gap-2"
+        >
+          <Sparkles className="w-5 h-5" />
+          추가 정보 입력 시작
+        </button>
+        <button
+          type="button"
+          onClick={onSkip}
+          className="px-6 py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold"
+        >
+          나중에 할게요
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // Empty form data
 const getEmptyFormData = (): RegistrationFormData => ({
   step1: {
@@ -100,6 +146,7 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [showPostSignupScreen, setShowPostSignupScreen] = useState(false);
   const [showAdditionalFlowNotice, setShowAdditionalFlowNotice] = useState(false);
 
   // Auto-save draft (debounced)
@@ -212,12 +259,27 @@ export default function RegisterPage() {
     [errors]
   );
 
+  const handleStartAdditionalInfo = useCallback(() => {
+    setShowPostSignupScreen(false);
+    showToast('추가 정보를 입력해 주세요.', 'info');
+  }, [showToast]);
+
+  const handleSkipAdditionalInfo = useCallback(() => {
+    clearDraft();
+    showToast('언제든지 설정에서 추가 정보를 입력할 수 있습니다.', 'info');
+    navigate('/dashboard');
+  }, [clearDraft, navigate, showToast]);
+
   // Navigate to next step
   const handleNext = async () => {
     setIsLoading(true);
     setErrors({});
 
     try {
+      if (currentStep === 2 && showPostSignupScreen) {
+        setIsLoading(false);
+        return;
+      }
       // Validate current step
       const validation = await validateStep(currentStep, formData);
 
@@ -335,6 +397,8 @@ export default function RegisterPage() {
     }
   };
 
+  const isPostSignupPrompt = currentStep === 2 && showPostSignupScreen;
+
   // Render current step component
   const renderStepContent = () => {
     switch (currentStep) {
@@ -347,6 +411,15 @@ export default function RegisterPage() {
           />
         );
       case 2:
+        if (showPostSignupScreen) {
+          return (
+            <PostSignupPrompt
+              email={formData.step1.email}
+              onContinue={handleStartAdditionalInfo}
+              onSkip={handleSkipAdditionalInfo}
+            />
+          );
+        }
         return (
           <Step2Role
             data={formData.step2}
@@ -400,11 +473,13 @@ export default function RegisterPage() {
         onPrevious={handlePrevious}
         onNext={currentStep === 5 ? handleSubmit : handleNext}
         onCancel={handleCancel}
-        onSkip={isStepOptional(currentStep) ? handleSkip : undefined}
+        onSkip={isStepOptional(currentStep) && !isPostSignupPrompt ? handleSkip : undefined}
         isNextDisabled={isLoading}
         isLoading={isLoading}
-        showPrevious={currentStep > 1}
-        showNext={true}
+        showPrevious={!isPostSignupPrompt}
+        showNext={!isPostSignupPrompt}
+        loggedInUserEmail={isRegistered ? formData.step1.email : undefined}
+        showCancelButton={!isPostSignupPrompt}
       >
         {renderStepContent()}
       </RegistrationWizardLayout>
