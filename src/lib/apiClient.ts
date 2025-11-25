@@ -122,6 +122,35 @@ export const normalizeUser = (user: ApiUserResponse): User => {
   };
 };
 
+/**
+ * Register a new user
+ *
+ * Current implementation: Basic registration with optional profile fields
+ * Future enhancement: Will support enhanced registration with role, skills, etc.
+ *
+ * Enhanced payload structure (for backend implementation):
+ * {
+ *   // Required
+ *   email: string;
+ *   password: string;
+ *   name: string;
+ *   role: 'developer' | 'designer' | 'planner' | 'other';
+ *   experienceLevel: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+ *
+ *   // Optional
+ *   specialization?: string;
+ *   roleDescription?: string;
+ *   skills?: string[];
+ *   interests?: string[];
+ *   profileImageUrl?: string;
+ *   bio?: string;
+ *   githubLink?: string;
+ *   githubUsername?: string;
+ *   portfolioUrl?: string;
+ *   location?: string;
+ *   profileCompleteness?: number;
+ * }
+ */
 export const registerUser = (payload: {
   email: string;
   password: string;

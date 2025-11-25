@@ -1,436 +1,408 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Mail, Lock, Eye, EyeOff, User, CheckCircle2 } from 'lucide-react'
-import { useToast } from '../contexts/ToastContext'
-import Button from '../components/ui/Button'
-import { ApiError, checkEmailExists, registerUser } from '../lib/apiClient'
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  RegistrationStep,
+  RegistrationFormData,
+  RegistrationStep1Data,
+  RegistrationStep2Data,
+  RegistrationStep3Data,
+  RegistrationStep4Data,
+  EnhancedRegisterPayload,
+} from '../types/registration';
+import { TechStackItem } from '../types';
+import { useApp } from '../contexts/AppContext';
+import { useToast } from '../contexts/ToastContext';
+import {
+  useRegistrationDraft,
+  useAutoSaveDraft,
+} from '../hooks/useRegistrationDraft';
+import {
+  validateStep,
+  getStepTitle,
+  getStepDescription,
+  isStepOptional,
+  calculateProfileCompleteness,
+} from '../lib/registrationWizard';
+import { convertSkillsToTechStack } from '../lib/skillRecommendations';
+import RegistrationWizardLayout from '../components/registration-wizard/RegistrationWizardLayout';
+import RegistrationStepIndicator from '../components/registration-wizard/RegistrationStepIndicator';
+import Step1BasicInfo from '../components/registration-wizard/steps/Step1BasicInfo';
+import Step2Role from '../components/registration-wizard/steps/Step2Role';
+import Step3Skills from '../components/registration-wizard/steps/Step3Skills';
+import Step4Profile from '../components/registration-wizard/steps/Step4Profile';
+import Step5Review from '../components/registration-wizard/steps/Step5Review';
 
-export default function RegisterPage() {
-  const navigate = useNavigate()
-  const { showToast } = useToast()
+// Available tech stack (simplified for now)
+const AVAILABLE_TECH: TechStackItem[] = [
+  { id: 'react', name: 'React', category: 'frontend' },
+  { id: 'vue', name: 'Vue.js', category: 'frontend' },
+  { id: 'angular', name: 'Angular', category: 'frontend' },
+  { id: 'nextjs', name: 'Next.js', category: 'frontend' },
+  { id: 'typescript', name: 'TypeScript', category: 'language' },
+  { id: 'javascript', name: 'JavaScript', category: 'language' },
+  { id: 'python', name: 'Python', category: 'language' },
+  { id: 'java', name: 'Java', category: 'language' },
+  { id: 'nodejs', name: 'Node.js', category: 'backend' },
+  { id: 'express', name: 'Express', category: 'backend' },
+  { id: 'django', name: 'Django', category: 'backend' },
+  { id: 'spring', name: 'Spring', category: 'backend' },
+  { id: 'postgresql', name: 'PostgreSQL', category: 'database' },
+  { id: 'mongodb', name: 'MongoDB', category: 'database' },
+  { id: 'redis', name: 'Redis', category: 'database' },
+  { id: 'docker', name: 'Docker', category: 'devops' },
+  { id: 'kubernetes', name: 'Kubernetes', category: 'devops' },
+  { id: 'aws', name: 'AWS', category: 'devops' },
+  { id: 'figma', name: 'Figma', category: 'design' },
+  { id: 'tailwind', name: 'Tailwind CSS', category: 'frontend' },
+];
 
-  const [formData, setFormData] = useState({
+// Empty form data
+const getEmptyFormData = (): RegistrationFormData => ({
+  step1: {
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState<{
-    name?: string
-    email?: string
-    password?: string
-    confirmPassword?: string
-  }>({})
-  const [agreedToTerms, setAgreedToTerms] = useState(false)
+    agreedToTerms: false,
+  },
+  step2: {
+    role: 'developer',
+    experienceLevel: 'intermediate',
+    specialization: '',
+    roleDescription: '',
+  },
+  step3: {
+    skills: [],
+    interests: [],
+  },
+  step4: {
+    profileImageUrl: '',
+    bio: '',
+    githubLink: '',
+    githubUsername: '',
+    portfolioUrl: '',
+    location: '',
+    githubImported: false,
+  },
+});
 
-  const validateForm = () => {
-    const newErrors: {
-      name?: string
-      email?: string
-      password?: string
-      confirmPassword?: string
-    } = {}
+export default function RegisterPage() {
+  const navigate = useNavigate();
+  const { register } = useApp();
+  const { showToast } = useToast();
+  const { hasDraft, loadDraft, clearDraft, draftLoaded } = useRegistrationDraft();
 
-    // 이름 검증
-    if (!formData.name) {
-      newErrors.name = '이름을 입력해주세요'
-    } else if (formData.name.length < 2) {
-      newErrors.name = '이름은 최소 2자 이상이어야 합니다'
+  const [currentStep, setCurrentStep] = useState<RegistrationStep>(1);
+  const [completedSteps, setCompletedSteps] = useState<RegistrationStep[]>([]);
+  const [formData, setFormData] = useState<RegistrationFormData>(getEmptyFormData());
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Auto-save draft (debounced)
+  useAutoSaveDraft(formData, currentStep, completedSteps, currentStep < 5);
+
+  // Load draft on mount
+  useEffect(() => {
+    if (hasDraft && !draftLoaded) {
+      const draft = loadDraft();
+      if (draft) {
+        setFormData(draft.formData);
+        setCurrentStep(draft.currentStep);
+        setCompletedSteps(draft.completedSteps);
+      }
     }
+  }, [hasDraft, draftLoaded, loadDraft]);
 
-    // 이메일 검증
-    if (!formData.email) {
-      newErrors.email = '이메일을 입력해주세요'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = '올바른 이메일 형식이 아닙니다'
-    }
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleCancel();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (currentStep === 5) {
+          handleSubmit();
+        } else {
+          handleNext();
+        }
+      }
+    };
 
-    // 비밀번호 검증
-    if (!formData.password) {
-      newErrors.password = '비밀번호를 입력해주세요'
-    } else if (formData.password.length < 8) {
-      newErrors.password = '비밀번호는 최소 8자 이상이어야 합니다'
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = '대문자, 소문자, 숫자를 포함해야 합니다'
-    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentStep, formData]);
 
-    // 비밀번호 확인 검증
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = '비밀번호 확인을 입력해주세요'
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = '비밀번호가 일치하지 않습니다'
-    }
+  // Handle field changes for step 1
+  const handleStep1Change = useCallback(
+    (field: keyof RegistrationStep1Data, value: string | boolean) => {
+      setFormData((prev) => ({
+        ...prev,
+        step1: { ...prev.step1, [field]: value },
+      }));
+      // Clear error for this field
+      if (errors[field]) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    },
+    [errors]
+  );
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+  // Handle field changes for step 2
+  const handleStep2Change = useCallback(
+    (field: keyof RegistrationStep2Data, value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        step2: { ...prev.step2, [field]: value },
+      }));
+      if (errors[field]) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    },
+    [errors]
+  );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Handle field changes for step 3
+  const handleStep3Change = useCallback(
+    (field: keyof RegistrationStep3Data, value: TechStackItem[]) => {
+      setFormData((prev) => ({
+        ...prev,
+        step3: { ...prev.step3, [field]: value },
+      }));
+    },
+    []
+  );
 
-    if (!validateForm()) {
-      return
-    }
+  // Handle field changes for step 4
+  const handleStep4Change = useCallback(
+    (field: keyof RegistrationStep4Data, value: string | File | boolean) => {
+      setFormData((prev) => ({
+        ...prev,
+        step4: { ...prev.step4, [field]: value },
+      }));
+      if (errors[field]) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    },
+    [errors]
+  );
 
-    if (!agreedToTerms) {
-      showToast('이용약관에 동의해주세요', 'warning')
-      return
-    }
+  // Handle GitHub import (add suggested skills to step 3)
+  const handleGitHubImport = useCallback((suggestedSkills: string[]) => {
+    const skillItems = convertSkillsToTechStack(suggestedSkills);
+    setFormData((prev) => ({
+      ...prev,
+      step3: { ...prev.step3, skills: [...prev.step3.skills, ...skillItems] },
+    }));
+    showToast(`${suggestedSkills.length}개의 스킬이 추가되었습니다`, 'success');
+  }, [showToast]);
 
-    setIsSubmitting(true)
+  // Navigate to next step
+  const handleNext = async () => {
+    setIsLoading(true);
+    setErrors({});
 
     try {
-      const emailExists = await checkEmailExists(formData.email).catch(() => false)
-      if (emailExists) {
-        setErrors((prev) => ({ ...prev, email: '이미 등록된 이메일입니다' }))
-        setIsSubmitting(false)
-        return
+      // Validate current step
+      const validation = await validateStep(currentStep, formData);
+
+      if (!validation.isValid) {
+        setErrors(validation.errors);
+        showToast('입력 정보를 확인해주세요', 'error');
+        setIsLoading(false);
+        return;
       }
 
-      await registerUser({
-        email: formData.email,
-        password: formData.password,
-        name: formData.name,
-      })
+      // Mark step as completed
+      if (!completedSteps.includes(currentStep)) {
+        setCompletedSteps((prev) => [...prev, currentStep]);
+      }
 
-      showToast('회원가입이 완료되었습니다!', 'success')
-      navigate('/login')
+      // Move to next step
+      if (currentStep < 5) {
+        setCurrentStep((prev) => (prev + 1) as RegistrationStep);
+      }
     } catch (error) {
-      if (error instanceof ApiError) {
-        showToast(error.message || '회원가입에 실패했습니다.', 'error')
-      } else {
-        showToast('회원가입에 실패했습니다. 다시 시도해주세요.', 'error')
-      }
+      showToast('검증 중 오류가 발생했습니다', 'error');
+      console.error('Validation error:', error);
     } finally {
-      setIsSubmitting(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  // 비밀번호 강도 체크
-  const getPasswordStrength = () => {
-    const password = formData.password
-    if (!password) return null
+  // Navigate to previous step
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => (prev - 1) as RegistrationStep);
+    }
+  };
 
-    let strength = 0
-    if (password.length >= 8) strength++
-    if (password.length >= 12) strength++
-    if (/[a-z]/.test(password)) strength++
-    if (/[A-Z]/.test(password)) strength++
-    if (/\d/.test(password)) strength++
-    if (/[^a-zA-Z\d]/.test(password)) strength++
+  // Skip current step (for optional steps)
+  const handleSkip = () => {
+    if (isStepOptional(currentStep)) {
+      if (!completedSteps.includes(currentStep)) {
+        setCompletedSteps((prev) => [...prev, currentStep]);
+      }
+      setCurrentStep((prev) => (prev + 1) as RegistrationStep);
+    }
+  };
 
-    if (strength <= 2) return { label: '약함', color: 'bg-red-500', width: 'w-1/3' }
-    if (strength <= 4) return { label: '보통', color: 'bg-yellow-500', width: 'w-2/3' }
-    return { label: '강함', color: 'bg-green-500', width: 'w-full' }
-  }
+  // Cancel registration
+  const handleCancel = () => {
+    if (window.confirm('회원가입을 취소하시겠습니까? 입력한 정보는 임시 저장됩니다.')) {
+      navigate('/login');
+    }
+  };
 
-  const passwordStrength = getPasswordStrength()
+  // Submit registration
+  const handleSubmit = async () => {
+    setIsLoading(true);
+
+    try {
+      // Build registration payload
+      const payload: EnhancedRegisterPayload = {
+        // Step 1 - Required
+        email: formData.step1.email,
+        password: formData.step1.password,
+        name: formData.step1.name,
+
+        // Step 2 - Required
+        role: formData.step2.role,
+        experienceLevel: formData.step2.experienceLevel,
+        specialization: formData.step2.specialization || undefined,
+        roleDescription: formData.step2.roleDescription || undefined,
+
+        // Step 3 - Optional
+        skills: formData.step3.skills.map((s) => s.name),
+        interests: formData.step3.interests,
+
+        // Step 4 - Optional
+        profileImageUrl: formData.step4.profileImageUrl || undefined,
+        bio: formData.step4.bio || undefined,
+        githubLink: formData.step4.githubLink || undefined,
+        githubUsername: formData.step4.githubUsername || undefined,
+        portfolioUrl: formData.step4.portfolioUrl || undefined,
+        location: formData.step4.location || undefined,
+
+        // Metadata
+        profileCompleteness: calculateProfileCompleteness(formData),
+      };
+
+      // Call registration API
+      await register(payload.email, payload.password, payload.name);
+
+      // Clear draft
+      clearDraft();
+
+      // Show success message
+      showToast('회원가입이 완료되었습니다! 🎉', 'success');
+
+      // Navigate to dashboard
+      navigate('/dashboard');
+    } catch (error) {
+      showToast(
+        error instanceof Error ? error.message : '회원가입에 실패했습니다',
+        'error'
+      );
+      console.error('Registration error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle step click from indicator
+  const handleStepClick = (step: RegistrationStep) => {
+    // Only allow clicking on completed steps or current step
+    if (completedSteps.includes(step) || step < currentStep) {
+      setCurrentStep(step);
+    }
+  };
+
+  // Render current step component
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <Step1BasicInfo
+            data={formData.step1}
+            errors={errors}
+            onChange={handleStep1Change}
+          />
+        );
+      case 2:
+        return (
+          <Step2Role
+            data={formData.step2}
+            errors={errors}
+            onChange={handleStep2Change}
+          />
+        );
+      case 3:
+        return (
+          <Step3Skills
+            data={formData.step3}
+            errors={errors}
+            onChange={handleStep3Change}
+            role={formData.step2.role}
+            experienceLevel={formData.step2.experienceLevel}
+            specialization={formData.step2.specialization}
+            availableTech={AVAILABLE_TECH}
+          />
+        );
+      case 4:
+        return (
+          <Step4Profile
+            data={formData.step4}
+            errors={errors}
+            onChange={handleStep4Change}
+            onGitHubImport={handleGitHubImport}
+          />
+        );
+      case 5:
+        return <Step5Review data={formData} onEdit={handleStepClick} />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center px-4 py-8 sm:px-6 lg:px-8">
-      {/* 헤더 - 모바일 최적화 */}
-      <div className="w-full max-w-md mx-auto">
-        {/* 로고 - 반응형 크기 */}
-        <div className="flex justify-center">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg sm:text-xl">OK</span>
-          </div>
-        </div>
+    <>
+      {/* Step Indicator */}
+      <RegistrationStepIndicator
+        currentStep={currentStep}
+        completedSteps={completedSteps}
+        onStepClick={handleStepClick}
+      />
 
-        {/* 제목 - 반응형 텍스트 */}
-        <h2 className="mt-4 sm:mt-6 text-center text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-          OpenKnot 시작하기
-        </h2>
-
-        {/* 부제목 - 반응형 텍스트 */}
-        <p className="mt-2 text-center text-sm sm:text-base text-gray-600 dark:text-gray-400">
-          이미 계정이 있으신가요?{' '}
-          <Link
-            to="/login"
-            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 underline-offset-4 hover:underline"
-          >
-            로그인
-          </Link>
-        </p>
-      </div>
-
-      {/* 폼 컨테이너 - 모바일 최적화 */}
-      <div className="mt-6 sm:mt-8 w-full max-w-md mx-auto">
-        <div className="bg-white dark:bg-gray-800 py-6 px-6 shadow-lg rounded-xl sm:py-8 sm:px-10">
-          {/* 회원가입 폼 - 모바일 최적화 */}
-          <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
-            {/* 이름 */}
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >
-                이름
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                </div>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  autoComplete="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className={`block w-full pl-9 sm:pl-10 pr-3 py-2.5 sm:py-3 text-sm sm:text-base border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                    errors.name
-                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder="홍길동"
-                />
-              </div>
-              {errors.name && (
-                <p className="mt-1.5 text-xs sm:text-sm text-red-600 dark:text-red-400">
-                  {errors.name}
-                </p>
-              )}
-            </div>
-
-            {/* 이메일 */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >
-                이메일
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  inputMode="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className={`block w-full pl-9 sm:pl-10 pr-3 py-2.5 sm:py-3 text-sm sm:text-base border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                    errors.email
-                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder="your@email.com"
-                />
-              </div>
-              {errors.email && (
-                <p className="mt-1.5 text-xs sm:text-sm text-red-600 dark:text-red-400">
-                  {errors.email}
-                </p>
-              )}
-            </div>
-
-            {/* 비밀번호 */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >
-                비밀번호
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={`block w-full pl-9 sm:pl-10 pr-10 sm:pr-11 py-2.5 sm:py-3 text-sm sm:text-base border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                    errors.password
-                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] min-h-[44px] justify-center"
-                  aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" />
-                  ) : (
-                    <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" />
-                  )}
-                </button>
-              </div>
-              {/* 비밀번호 강도 표시 */}
-              {passwordStrength && (
-                <div className="mt-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-600 dark:text-gray-400">비밀번호 강도</span>
-                    <span className={`text-xs font-medium ${
-                      passwordStrength.label === '강함' ? 'text-green-600 dark:text-green-400' :
-                      passwordStrength.label === '보통' ? 'text-yellow-600 dark:text-yellow-400' :
-                      'text-red-600 dark:text-red-400'
-                    }`}>
-                      {passwordStrength.label}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                    <div
-                      className={`${passwordStrength.color} h-1.5 rounded-full transition-all duration-300 ${passwordStrength.width}`}
-                    />
-                  </div>
-                </div>
-              )}
-              {errors.password && (
-                <p className="mt-1.5 text-xs sm:text-sm text-red-600 dark:text-red-400">
-                  {errors.password}
-                </p>
-              )}
-            </div>
-
-            {/* 비밀번호 확인 */}
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-              >
-                비밀번호 확인
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  value={formData.confirmPassword}
-                  onChange={(e) =>
-                    setFormData({ ...formData, confirmPassword: e.target.value })
-                  }
-                  className={`block w-full pl-9 sm:pl-10 pr-10 sm:pr-11 py-2.5 sm:py-3 text-sm sm:text-base border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                    errors.confirmPassword
-                      ? 'border-red-500 dark:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center min-w-[44px] min-h-[44px] justify-center"
-                  aria-label={showConfirmPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" />
-                  ) : (
-                    <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" />
-                  )}
-                </button>
-              </div>
-              {formData.confirmPassword && formData.password === formData.confirmPassword && (
-                <p className="mt-1.5 text-xs sm:text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
-                  <CheckCircle2 className="w-4 h-4" />
-                  비밀번호가 일치합니다
-                </p>
-              )}
-              {errors.confirmPassword && (
-                <p className="mt-1.5 text-xs sm:text-sm text-red-600 dark:text-red-400">
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
-
-            {/* 약관 동의 - 터치 친화적 */}
-            <div className="pt-2">
-              <div className="flex items-start">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="h-4 w-4 sm:h-[18px] sm:w-[18px] mt-1 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
-                />
-                <label htmlFor="terms" className="ml-2 block text-sm sm:text-base cursor-pointer select-none">
-                  <span className="text-gray-700 dark:text-gray-300">
-                    <Link
-                      to="/terms"
-                      className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                    >
-                      이용약관
-                    </Link>
-                    {' '}및{' '}
-                    <Link
-                      to="/privacy"
-                      className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                    >
-                      개인정보 처리방침
-                    </Link>
-                    에 동의합니다
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            {/* 회원가입 버튼 - 구분감 있는 디자인 */}
-            <div className="pt-2">
-              <Button
-                type="submit"
-                variant="primary"
-                className="w-full min-h-[44px] sm:min-h-[48px] text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700 !outline-none !ring-0 !ring-offset-0 !border-0 focus:!outline-none focus:!ring-0 focus-visible:!outline-none focus-visible:!ring-0"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    가입 중...
-                  </div>
-                ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    회원가입
-                    <svg
-                      className="w-4 h-4 sm:w-5 sm:h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M13 7l5 5m0 0l-5 5m5-5H6"
-                      />
-                    </svg>
-                  </span>
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
-
-        {/* 추가 정보 - 모바일 최적화 */}
-        <p className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-          가입하시면{' '}
-          <Link
-            to="/terms"
-            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-          >
-            서비스 약관
-          </Link>
-          에 동의하게 됩니다
-        </p>
-      </div>
-    </div>
-  )
+      {/* Wizard Layout */}
+      <RegistrationWizardLayout
+        currentStep={currentStep}
+        totalSteps={5}
+        title={getStepTitle(currentStep)}
+        description={getStepDescription(currentStep)}
+        onPrevious={handlePrevious}
+        onNext={currentStep === 5 ? handleSubmit : handleNext}
+        onCancel={handleCancel}
+        onSkip={isStepOptional(currentStep) ? handleSkip : undefined}
+        isNextDisabled={isLoading}
+        isLoading={isLoading}
+        showPrevious={currentStep > 1}
+        showNext={true}
+      >
+        {renderStepContent()}
+      </RegistrationWizardLayout>
+    </>
+  );
 }
