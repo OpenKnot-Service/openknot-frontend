@@ -9,7 +9,7 @@ import {
   RegistrationStep4Data,
   EnhancedRegisterPayload,
 } from '../types/registration';
-import { TechStackItem } from '../types';
+import { TechStackItem } from '../types/wizard';
 import { useApp } from '../contexts/AppContext';
 import { useToast } from '../contexts/ToastContext';
 import {
@@ -172,7 +172,10 @@ export default function RegisterPage() {
 
   // Handle field changes for step 3
   const handleStep3Change = useCallback(
-    (field: keyof RegistrationStep3Data, value: TechStackItem[]) => {
+    (
+      field: keyof RegistrationStep3Data,
+      value: RegistrationStep3Data[keyof RegistrationStep3Data]
+    ) => {
       setFormData((prev) => ({
         ...prev,
         step3: { ...prev.step3, [field]: value },

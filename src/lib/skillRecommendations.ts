@@ -1,5 +1,5 @@
 import { UserRole, ExperienceLevel } from '../types/registration';
-import { TechStackItem } from '../types';
+import { TechStackItem } from '../types/wizard';
 
 /**
  * Role-based skill recommendations

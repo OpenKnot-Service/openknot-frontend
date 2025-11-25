@@ -1,4 +1,4 @@
-import { TechStackItem } from './index';
+import { TechStackItem } from './wizard';
 
 export type RegistrationStep = 1 | 2 | 3 | 4 | 5;
 

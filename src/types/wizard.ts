@@ -8,7 +8,15 @@ export type ProjectType = 'web' | 'mobile' | 'desktop' | 'library' | 'other';
 export type ProjectVisibility = 'public' | 'private';
 
 // 기술 카테고리
-export type TechCategory = 'frontend' | 'backend' | 'database' | 'devops' | 'mobile' | 'other';
+export type TechCategory =
+  | 'frontend'
+  | 'backend'
+  | 'database'
+  | 'devops'
+  | 'mobile'
+  | 'language'
+  | 'design'
+  | 'other';
 
 // 기술 스택 아이템
 export interface TechStackItem {

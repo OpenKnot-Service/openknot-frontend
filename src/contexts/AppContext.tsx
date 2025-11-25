@@ -17,6 +17,7 @@ import {
   refreshAccessToken,
   storeAccessToken,
   getStoredAccessToken,
+  registerUser,
 } from '../lib/apiClient';
 
 interface AppContextType {
@@ -30,6 +31,7 @@ interface AppContextType {
   isNotificationCenterOpen: boolean;
   setIsNotificationCenterOpen: (open: boolean) => void;
   login: (email: string, password: string) => Promise<User>;
+  register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<User | null>;
   addProject: (project: Project) => void;
@@ -107,6 +109,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [saveAccessToken]
   );
+
+  const register = useCallback(async (email: string, password: string, name: string) => {
+    await registerUser({ email, password, name });
+  }, []);
 
   const logout = useCallback(async () => {
     try {
@@ -189,6 +195,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         isNotificationCenterOpen,
         setIsNotificationCenterOpen,
         login,
+        register,
         logout,
         refreshUser,
         addProject,

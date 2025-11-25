@@ -1,12 +1,7 @@
 import { useState, useRef } from 'react';
 import { Upload, Github, Loader2, MapPin, Link as LinkIcon, User } from 'lucide-react';
 import { RegistrationStep4Data } from '../../../types/registration';
-import { TechStackItem } from '../../../types';
-import {
-  importGitHubProfile,
-  extractGitHubUsername,
-  isValidGitHubUsername,
-} from '../../../lib/githubProfileImport';
+import { importGitHubProfile, extractGitHubUsername } from '../../../lib/githubProfileImport';
 
 interface Step4ProfileProps {
   data: RegistrationStep4Data;

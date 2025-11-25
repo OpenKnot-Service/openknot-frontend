@@ -108,15 +108,21 @@ function extractSkillsFromRepos(repos: any[]): string[] {
     // Check topics
     if (repo.topics && Array.isArray(repo.topics)) {
       repo.topics.forEach((topic: string) => {
-        // Capitalize first letter
+        const normalizedTopic = topic.toLowerCase();
         const capitalizedTopic = topic.charAt(0).toUpperCase() + topic.slice(1);
+        let matchedFramework = false;
 
         // Check if topic matches known frameworks
         Object.entries(FRAMEWORK_PATTERNS).forEach(([framework, patterns]) => {
-          if (patterns.includes(topic.toLowerCase())) {
+          if (patterns.includes(normalizedTopic)) {
             skillsSet.add(framework);
+            matchedFramework = true;
           }
         });
+
+        if (!matchedFramework) {
+          skillsSet.add(capitalizedTopic);
+        }
       });
     }
   });

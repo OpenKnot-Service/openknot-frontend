@@ -72,6 +72,8 @@ const buildTeamRecommendations = ({
     database: 0,
     devops: 0,
     mobile: 0,
+    language: 0,
+    design: 0,
     other: 0,
   };
 

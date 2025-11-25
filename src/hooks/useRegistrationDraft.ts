@@ -1,49 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  RegistrationFormData,
-  RegistrationDraft,
-  RegistrationStep,
-  RegistrationStep1Data,
-  RegistrationStep2Data,
-  RegistrationStep3Data,
-  RegistrationStep4Data,
-} from '../types/registration';
+import { RegistrationFormData, RegistrationDraft, RegistrationStep } from '../types/registration';
 import { useToast } from '../contexts/ToastContext';
 
 const DRAFT_KEY = 'openknot-registration-draft';
 const DRAFT_VERSION = 1;
 const DRAFT_EXPIRY_DAYS = 7;
 const DEBOUNCE_DELAY = 1000; // 1 second
-
-// Default/empty form data
-const getEmptyFormData = (): RegistrationFormData => ({
-  step1: {
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    agreedToTerms: false,
-  },
-  step2: {
-    role: 'developer',
-    experienceLevel: 'intermediate',
-    specialization: '',
-    roleDescription: '',
-  },
-  step3: {
-    skills: [],
-    interests: [],
-  },
-  step4: {
-    profileImageUrl: '',
-    bio: '',
-    githubLink: '',
-    githubUsername: '',
-    portfolioUrl: '',
-    location: '',
-    githubImported: false,
-  },
-});
 
 /**
  * Hook for managing registration draft auto-save and restore

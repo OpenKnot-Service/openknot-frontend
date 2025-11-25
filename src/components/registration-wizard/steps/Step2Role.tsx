@@ -1,5 +1,5 @@
 import { Code, Palette, Target, Users } from 'lucide-react';
-import { RegistrationStep2Data, UserRole, ExperienceLevel } from '../../../types/registration';
+import { RegistrationStep2Data } from '../../../types/registration';
 import { ROLE_OPTIONS, EXPERIENCE_LEVEL_OPTIONS } from '../../../lib/registrationWizard';
 
 interface Step2RoleProps {

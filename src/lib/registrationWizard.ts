@@ -8,8 +8,6 @@ import {
   StepValidation,
   RoleOption,
   ExperienceLevelOption,
-  UserRole,
-  ExperienceLevel,
 } from '../types/registration';
 import { checkEmailExists } from './apiClient';
 

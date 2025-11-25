@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Package, TrendingUp, Plus } from 'lucide-react';
+import { Sparkles, Package, TrendingUp } from 'lucide-react';
 import { RegistrationStep3Data, UserRole, ExperienceLevel } from '../../../types/registration';
-import { TechStackItem } from '../../../types';
+import { TechStackItem } from '../../../types/wizard';
 import TechStackInput from '../../ui/TechStackInput';
 import {
   getSkillRecommendations,
   getPopularSkills,
   getRelevantPresets,
-  convertSkillsToTechStack,
 } from '../../../lib/skillRecommendations';
 
 interface Step3SkillsProps {
   data: RegistrationStep3Data;
   errors: Record<string, string>;
-  onChange: (field: keyof RegistrationStep3Data, value: TechStackItem[]) => void;
+  onChange: (
+    field: keyof RegistrationStep3Data,
+    value: RegistrationStep3Data[keyof RegistrationStep3Data]
+  ) => void;
   role: UserRole;
   experienceLevel: ExperienceLevel;
   specialization?: string;
@@ -259,14 +261,13 @@ export default function Step3Skills({
               <button
                 type="button"
                 onClick={() => {
-                  onChange(
-                    'interests',
-                    // We need to pass TechStackItem[] but interests is string[]
-                    // This is a type mismatch - interests should be handled differently
-                    data.skills // Temporarily using skills to satisfy type
+                  const updatedInterests = data.interests.filter(
+                    (_, interestIndex) => interestIndex !== index
                   );
+                  onChange('interests', updatedInterests);
                 }}
                 className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                aria-label={`${interest} 태그 삭제`}
               >
                 ×
               </button>
@@ -291,8 +292,7 @@ export default function Step3Skills({
               e.preventDefault();
               const newInterest = e.currentTarget.value.trim();
               if (!data.interests.includes(newInterest)) {
-                // TODO: Fix this - interests should be handled separately
-                // For now, this won't work correctly due to type mismatch
+                onChange('interests', [...data.interests, newInterest]);
               }
               e.currentTarget.value = '';
             }
