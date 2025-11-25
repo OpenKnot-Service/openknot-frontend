@@ -67,37 +67,43 @@ interface PostSignupPromptProps {
 
 function PostSignupPrompt({ email, onContinue, onSkip }: PostSignupPromptProps) {
   return (
-    <div className="text-center space-y-6 py-10">
-      <div className="mx-auto w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-300">
-        <ShieldCheck className="w-10 h-10" />
+    <div className="text-center space-y-8 py-12">
+      <div className="relative inline-flex">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 opacity-40 blur-2xl animate-pulse" />
+        <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white shadow-2xl">
+          <div
+            className="absolute inset-1 rounded-full border border-white/30 animate-spin"
+            style={{ animationDuration: '6s' }}
+          />
+          <ShieldCheck className="w-12 h-12 animate-bounce" />
+        </div>
       </div>
-      <div>
-        <p className="text-sm uppercase tracking-wide text-blue-500 font-semibold mb-2">
+      <div className="space-y-3">
+        <p className="text-sm uppercase tracking-[0.2em] text-blue-500 font-semibold">
           회원가입 완료
         </p>
-        <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {email} 계정이 생성되었습니다!
+        <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
+          {email} 계정이 준비되었습니다 🎉
         </h3>
         <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          역할·스킬·프로필 정보를 추가로 입력하면 팀 추천과 프로젝트 매칭이 더욱 정확해집니다.
-          계속 진행하시겠습니까?
+          이제 역할, 스킬, 프로필 정보를 추가로 입력해 보세요. 풍부한 정보는 프로젝트 매칭과 팀 추천을 더욱 정교하게 만들어 줍니다.
         </p>
       </div>
       <div className="flex flex-wrap justify-center gap-4">
         <button
           type="button"
           onClick={onContinue}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold shadow-lg shadow-blue-500/30 flex items-center gap-2"
+          className="px-8 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg shadow-blue-500/30 flex items-center gap-2 hover:scale-[1.02] transition-transform"
         >
           <Sparkles className="w-5 h-5" />
-          추가 정보 입력 시작
+          추가 정보 입력하기
         </button>
         <button
           type="button"
           onClick={onSkip}
-          className="px-6 py-3 rounded-xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold"
+          className="px-8 py-3 rounded-2xl border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800"
         >
-          나중에 할게요
+          바로 시작하기
         </button>
       </div>
     </div>
