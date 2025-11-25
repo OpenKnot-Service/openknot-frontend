@@ -23,7 +23,6 @@ import {
   isStepOptional,
   calculateProfileCompleteness,
 } from '../lib/registrationWizard';
-import { convertSkillsToTechStack } from '../lib/skillRecommendations';
 import RegistrationWizardLayout from '../components/registration-wizard/RegistrationWizardLayout';
 import RegistrationStepIndicator from '../components/registration-wizard/RegistrationStepIndicator';
 import Step1BasicInfo from '../components/registration-wizard/steps/Step1BasicInfo';
@@ -202,16 +201,6 @@ export default function RegisterPage() {
     [errors]
   );
 
-  // Handle GitHub import (add suggested skills to step 3)
-  const handleGitHubImport = useCallback((suggestedSkills: string[]) => {
-    const skillItems = convertSkillsToTechStack(suggestedSkills);
-    setFormData((prev) => ({
-      ...prev,
-      step3: { ...prev.step3, skills: [...prev.step3.skills, ...skillItems] },
-    }));
-    showToast(`${suggestedSkills.length}개의 스킬이 추가되었습니다`, 'success');
-  }, [showToast]);
-
   // Navigate to next step
   const handleNext = async () => {
     setIsLoading(true);
@@ -370,7 +359,6 @@ export default function RegisterPage() {
             data={formData.step4}
             errors={errors}
             onChange={handleStep4Change}
-            onGitHubImport={handleGitHubImport}
           />
         );
       case 5:

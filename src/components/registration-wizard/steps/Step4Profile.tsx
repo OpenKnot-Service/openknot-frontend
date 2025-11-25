@@ -7,14 +7,12 @@ interface Step4ProfileProps {
   data: RegistrationStep4Data;
   errors: Record<string, string>;
   onChange: (field: keyof RegistrationStep4Data, value: string | File | boolean) => void;
-  onGitHubImport?: (skills: string[]) => void;
 }
 
 export default function Step4Profile({
   data,
   errors,
   onChange,
-  onGitHubImport,
 }: Step4ProfileProps) {
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
@@ -69,22 +67,10 @@ export default function Step4Profile({
     try {
       const result = await importGitHubProfile(username);
 
-      // Update profile fields
       if (result.profileImageUrl) {
         setPreviewImage(result.profileImageUrl);
         onChange('profileImageUrl', result.profileImageUrl);
-      }
-      if (result.bio) onChange('bio', result.bio);
-      if (result.location) onChange('location', result.location);
-      if (result.githubLink) onChange('githubLink', result.githubLink);
-      if (result.githubUsername) onChange('githubUsername', result.githubUsername);
-      if (result.portfolioUrl) onChange('portfolioUrl', result.portfolioUrl);
-
-      onChange('githubImported', true);
-
-      // Pass suggested skills to parent
-      if (onGitHubImport && result.suggestedSkills.length > 0) {
-        onGitHubImport(result.suggestedSkills);
+        onChange('githubImported', true);
       }
 
       setGithubInputValue('');
@@ -114,10 +100,10 @@ export default function Step4Profile({
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-white mb-2">
-              GitHub에서 프로필 가져오기
+              GitHub에서 프로필 이미지 가져오기
             </h3>
             <p className="text-sm text-gray-300 mb-4">
-              GitHub 프로필 정보와 스킬을 자동으로 가져옵니다
+              GitHub 아이디를 입력하면 <span className="font-semibold text-white">프로필 이미지</span>만 자동으로 적용됩니다. 나머지 GitHub 정보는 계정 연동을 통해서만 입력할 수 있습니다.
             </p>
 
             <div className="flex gap-2">
@@ -167,11 +153,74 @@ export default function Step4Profile({
 
             {data.githubImported && (
               <p className="mt-2 text-sm text-green-400">
-                ✓ GitHub 프로필을 성공적으로 가져왔습니다
+                ✓ GitHub 이미지가 성공적으로 적용되었습니다
               </p>
             )}
           </div>
         </div>
+      </div>
+
+      {/* GitHub Account Linking */}
+      <div className="p-5 border border-blue-200 dark:border-blue-800 bg-blue-50/60 dark:bg-blue-900/10 rounded-xl">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-blue-900 dark:text-blue-100 mb-1">
+              GitHub 계정 연동 (API 필요)
+            </h3>
+            <p className="text-sm text-blue-700/90 dark:text-blue-200/80">
+              계정을 연동하면 GitHub 링크와 사용자명이 자동으로 동기화됩니다.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-200/60 text-blue-900 dark:bg-blue-800/50 dark:text-blue-200 cursor-not-allowed"
+          >
+            연동 API 준비 중
+          </button>
+        </div>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Github className="w-4 h-4 inline mr-1" />
+              GitHub 링크 (연동 전용)
+            </label>
+            <input
+              type="url"
+              value={data.githubLink || ''}
+              readOnly
+              className={`
+                w-full px-4 py-3 rounded-lg cursor-not-allowed
+                border ${errors.githubLink ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}
+                bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400
+              `}
+              placeholder="계정 연동 후 자동 입력됩니다"
+            />
+            {errors.githubLink && (
+              <p className="mt-1 text-sm text-red-500">{errors.githubLink}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              GitHub 사용자명 (연동 전용)
+            </label>
+            <input
+              type="text"
+              value={data.githubUsername || ''}
+              readOnly
+              className="
+                w-full px-4 py-3 rounded-lg cursor-not-allowed
+                border border-gray-300 dark:border-gray-600
+                bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400
+              "
+              placeholder="연동 API를 통해 자동 설정됩니다"
+            />
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-blue-700 dark:text-blue-200">
+          GitHub 정보는 전용 계정 연동 API를 통해서만 입력할 수 있습니다.
+        </p>
       </div>
 
       {/* Profile Image */}
@@ -270,36 +319,6 @@ export default function Step4Profile({
             {(data.bio || '').length} / 500
           </p>
         </div>
-      </div>
-
-      {/* GitHub Link */}
-      <div>
-        <label
-          htmlFor="githubLink"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-        >
-          <Github className="w-4 h-4 inline mr-1" />
-          GitHub 링크
-        </label>
-        <input
-          type="url"
-          id="githubLink"
-          value={data.githubLink || ''}
-          onChange={(e) => onChange('githubLink', e.target.value)}
-          className={`
-            w-full px-4 py-3 rounded-lg
-            border ${errors.githubLink ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}
-            bg-white dark:bg-gray-700
-            text-gray-900 dark:text-white
-            placeholder-gray-400 dark:placeholder-gray-500
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-            transition-all
-          `}
-          placeholder="https://github.com/username"
-        />
-        {errors.githubLink && (
-          <p className="mt-1 text-sm text-red-500">{errors.githubLink}</p>
-        )}
       </div>
 
       {/* Portfolio URL */}
