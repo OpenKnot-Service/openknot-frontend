@@ -28,15 +28,15 @@ export default function RegistrationStepIndicator({
   onStepClick,
 }: RegistrationStepIndicatorProps) {
   return (
-    <div className="w-full py-8">
-      <div className="flex items-center justify-between max-w-4xl mx-auto">
+    <div className="w-full py-8 overflow-x-auto">
+      <div className="flex items-center justify-between max-w-4xl min-w-[640px] mx-auto px-4 sm:px-0">
         {STEPS.map((step, index) => {
           const isCompleted = completedSteps.includes(step.number);
           const isCurrent = currentStep === step.number;
           const isClickable = isCompleted || step.number < currentStep;
 
           return (
-            <div key={step.number} className="flex-1 flex items-center">
+            <div key={step.number} className="flex-1 flex items-center flex-shrink-0">
               {/* Step Circle */}
               <div className="flex flex-col items-center flex-1">
                 <div className="relative">
@@ -77,13 +77,13 @@ export default function RegistrationStepIndicator({
                 <div className="mt-3 text-center">
                   <div
                     className={`
-                      text-sm font-medium transition-colors
+                      text-sm font-medium transition-colors whitespace-nowrap
                       ${isCurrent ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}
                     `}
                   >
                     {step.title}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
+                  <div className="text-xs text-gray-500 dark:text-gray-500 mt-0.5 whitespace-nowrap">
                     {step.description}
                   </div>
                 </div>
