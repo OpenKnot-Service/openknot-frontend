@@ -7,7 +7,6 @@ import {
   RegistrationStep2Data,
   RegistrationStep3Data,
   RegistrationStep4Data,
-  EnhancedRegisterPayload,
 } from '../types/registration';
 import { TechStackItem } from '../types/wizard';
 import { useApp } from '../contexts/AppContext';
@@ -21,8 +20,12 @@ import {
   getStepTitle,
   getStepDescription,
   isStepOptional,
-  calculateProfileCompleteness,
 } from '../lib/registrationWizard';
+import {
+  saveRegistrationStep2,
+  saveRegistrationStep3,
+  saveRegistrationStep4,
+} from '../lib/apiClient';
 import RegistrationWizardLayout from '../components/registration-wizard/RegistrationWizardLayout';
 import RegistrationStepIndicator from '../components/registration-wizard/RegistrationStepIndicator';
 import Step1BasicInfo from '../components/registration-wizard/steps/Step1BasicInfo';
@@ -87,7 +90,7 @@ const getEmptyFormData = (): RegistrationFormData => ({
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { register } = useApp();
+  const { register, login, user } = useApp();
   const { showToast } = useToast();
   const { hasDraft, loadDraft, clearDraft, draftLoaded } = useRegistrationDraft();
 
@@ -96,6 +99,8 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState<RegistrationFormData>(getEmptyFormData());
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [showAdditionalFlowNotice, setShowAdditionalFlowNotice] = useState(false);
 
   // Auto-save draft (debounced)
   useAutoSaveDraft(formData, currentStep, completedSteps, currentStep < 5);
@@ -111,6 +116,12 @@ export default function RegisterPage() {
       }
     }
   }, [hasDraft, draftLoaded, loadDraft]);
+
+  useEffect(() => {
+    if (user) {
+      setIsRegistered(true);
+    }
+  }, [user]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -217,6 +228,40 @@ export default function RegisterPage() {
         return;
       }
 
+      if (currentStep === 1 && !isRegistered) {
+        await register(formData.step1.email, formData.step1.password, formData.step1.name);
+        await login(formData.step1.email, formData.step1.password);
+        setIsRegistered(true);
+        setShowAdditionalFlowNotice(true);
+        showToast('기본 회원가입이 완료되었습니다. 추가 정보를 이어서 입력해보세요.', 'success');
+      } else if (currentStep === 2) {
+        await saveRegistrationStep2({
+          role: formData.step2.role,
+          experienceLevel: formData.step2.experienceLevel,
+          specialization: formData.step2.specialization || undefined,
+          roleDescription: formData.step2.roleDescription || undefined,
+          customRole: formData.step2.customRole || undefined,
+        });
+        setShowAdditionalFlowNotice(false);
+        showToast('역할 정보가 저장되었습니다.', 'success');
+      } else if (currentStep === 3) {
+        await saveRegistrationStep3({
+          skills: formData.step3.skills.map((s) => s.name),
+          interests: formData.step3.interests,
+        });
+        showToast('스킬 정보가 저장되었습니다.', 'success');
+      } else if (currentStep === 4) {
+        await saveRegistrationStep4({
+          bio: formData.step4.bio || undefined,
+          githubLink: formData.step4.githubLink || undefined,
+          githubUsername: formData.step4.githubUsername || undefined,
+          portfolioUrl: formData.step4.portfolioUrl || undefined,
+          location: formData.step4.location || undefined,
+          profileImageUrl: formData.step4.profileImageUrl || undefined,
+        });
+        showToast('프로필 정보가 저장되었습니다.', 'success');
+      }
+
       // Mark step as completed
       if (!completedSteps.includes(currentStep)) {
         setCompletedSteps((prev) => [...prev, currentStep]);
@@ -263,43 +308,11 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      // Build registration payload
-      const payload: EnhancedRegisterPayload = {
-        // Step 1 - Required
-        email: formData.step1.email,
-        password: formData.step1.password,
-        name: formData.step1.name,
-
-        // Step 2 - Required
-        role: formData.step2.role,
-        experienceLevel: formData.step2.experienceLevel,
-        specialization: formData.step2.specialization || undefined,
-        roleDescription: formData.step2.roleDescription || undefined,
-
-        // Step 3 - Optional
-        skills: formData.step3.skills.map((s) => s.name),
-        interests: formData.step3.interests,
-
-        // Step 4 - Optional
-        profileImageUrl: formData.step4.profileImageUrl || undefined,
-        bio: formData.step4.bio || undefined,
-        githubLink: formData.step4.githubLink || undefined,
-        githubUsername: formData.step4.githubUsername || undefined,
-        portfolioUrl: formData.step4.portfolioUrl || undefined,
-        location: formData.step4.location || undefined,
-
-        // Metadata
-        profileCompleteness: calculateProfileCompleteness(formData),
-      };
-
-      // Call registration API
-      await register(payload.email, payload.password, payload.name);
-
       // Clear draft
       clearDraft();
 
       // Show success message
-      showToast('회원가입이 완료되었습니다! 🎉', 'success');
+      showToast('추가 정보 입력이 완료되었습니다! 🎉', 'success');
 
       // Navigate to dashboard
       navigate('/dashboard');
@@ -339,6 +352,7 @@ export default function RegisterPage() {
             data={formData.step2}
             errors={errors}
             onChange={handleStep2Change}
+            showAdditionalFlowNotice={showAdditionalFlowNotice}
           />
         );
       case 3:

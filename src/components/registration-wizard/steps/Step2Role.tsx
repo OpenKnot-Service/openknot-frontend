@@ -6,6 +6,7 @@ interface Step2RoleProps {
   data: RegistrationStep2Data;
   errors: Record<string, string>;
   onChange: (field: keyof RegistrationStep2Data, value: string) => void;
+  showAdditionalFlowNotice?: boolean;
 }
 
 // Icon mapping
@@ -20,11 +21,20 @@ export default function Step2Role({
   data,
   errors,
   onChange,
+  showAdditionalFlowNotice,
 }: Step2RoleProps) {
   const selectedRoleOption = ROLE_OPTIONS.find((r) => r.id === data.role);
 
   return (
     <div className="space-y-8">
+      {showAdditionalFlowNotice && (
+        <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+          <p className="text-sm text-blue-900 dark:text-blue-100">
+            기본 회원가입이 완료되었습니다. 아래 추가 정보를 입력하면 팀 추천과 매칭이 더 정확해집니다.
+          </p>
+        </div>
+      )}
+
       {/* Role Selection */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">

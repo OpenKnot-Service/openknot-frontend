@@ -340,7 +340,7 @@ export function getStepDescription(step: RegistrationStep): string {
     2: '당신의 전문 분야와 경력을 알려주세요',
     3: '보유하고 있는 기술 스택을 선택해주세요 (선택 사항)',
     4: '프로필을 더욱 풍성하게 만들어보세요 (선택 사항)',
-    5: '입력한 정보를 확인하고 계정을 생성하세요',
+    5: '추가 정보를 확인하고 등록을 완료하세요',
   };
   return descriptions[step];
 }

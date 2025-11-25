@@ -1,4 +1,5 @@
 import { User } from '../types';
+import { ExperienceLevel, UserRole } from '../types/registration';
 
 const ACCESS_TOKEN_KEY = 'openknot_access_token';
 const rawBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'https://api.winter-cloud.com';
@@ -163,6 +164,40 @@ export const registerUser = (payload: {
     method: 'POST',
     body: JSON.stringify(payload),
     skipAuth: true,
+  });
+
+export const saveRegistrationStep2 = (payload: {
+  role: UserRole;
+  experienceLevel: ExperienceLevel;
+  specialization?: string;
+  roleDescription?: string;
+  customRole?: string;
+}) =>
+  apiRequest<void>('/registration/step2', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+export const saveRegistrationStep3 = (payload: {
+  skills: string[];
+  interests: string[];
+}) =>
+  apiRequest<void>('/registration/step3', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+
+export const saveRegistrationStep4 = (payload: {
+  bio?: string;
+  githubLink?: string;
+  githubUsername?: string;
+  portfolioUrl?: string;
+  location?: string;
+  profileImageUrl?: string;
+}) =>
+  apiRequest<void>('/registration/step4', {
+    method: 'POST',
+    body: JSON.stringify(payload),
   });
 
 export const loginUser = (payload: { email: string; password: string }) =>
