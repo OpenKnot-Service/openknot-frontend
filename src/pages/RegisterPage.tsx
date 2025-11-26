@@ -301,6 +301,7 @@ export default function RegisterPage() {
         await login(formData.step1.email, formData.step1.password);
         setIsRegistered(true);
         setShowAdditionalFlowNotice(true);
+        setShowPostSignupScreen(true);
         showToast('기본 회원가입이 완료되었습니다. 추가 정보를 이어서 입력해보세요.', 'success');
       } else if (currentStep === 2) {
         await saveRegistrationStep2({

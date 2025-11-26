@@ -48,7 +48,7 @@ function App() {
 
                   {/* Auth Pages - Redirect to dashboard if already logged in */}
                   <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
-                  <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
+                  <Route path="/register" element={<RegisterPage />} />
 
                   {/* App Pages with MainLayout */}
                   <Route element={<MainLayout />}>
