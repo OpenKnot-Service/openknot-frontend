@@ -278,23 +278,48 @@ export default function RegisterPage() {
     return trimmed.length > 0 ? trimmed : null;
   }, []);
 
-  const buildUserUpdatePayload = useCallback((): UpdateUserRequest => {
-    const baseRole =
-      formData.step2.role === 'other' ? formData.step2.customRole : formData.step2.role;
+  const mapRoleToPositionEnum = (role: RegistrationStep2Data['role']) => {
+    switch (role) {
+      case 'developer':
+        return 'DEVELOPER';
+      case 'designer':
+        return 'DESIGNER';
+      case 'planner':
+        return 'PLANNER';
+      case 'other':
+        return 'OTHER';
+      default:
+        return null;
+    }
+  };
 
+  const mapCareerLevelEnum = (level: RegistrationStep2Data['experienceLevel']) => {
+    const map: Record<RegistrationStep2Data['experienceLevel'], string> = {
+      beginner: 'BEGINNER',
+      intermediate: 'INTERMEDIATE',
+      advanced: 'ADVANCED',
+      expert: 'EXPERT',
+    };
+    return map[level];
+  };
+
+  const buildUserUpdatePayload = useCallback((): UpdateUserRequest => {
+    const position = mapRoleToPositionEnum(formData.step2.role);
     const specialization = sanitizeText(formData.step2.specialization);
+    const customRole = sanitizeText(formData.step2.customRole);
     const roleDescription = sanitizeText(formData.step2.roleDescription);
+    const careerLevel = mapCareerLevelEnum(formData.step2.experienceLevel);
 
     return {
       name: sanitizeText(formData.step1.name),
-      position: specialization ?? sanitizeText(baseRole),
-      detailedPosition: roleDescription ?? specialization,
-      careerLevel: sanitizeText(formData.step2.experienceLevel),
+      position,
+      detailedPosition: specialization ?? customRole ?? roleDescription,
+      careerLevel,
       profileImageUrl: sanitizeText(formData.step4.profileImageUrl),
       description: sanitizeText(formData.step4.bio) ?? roleDescription,
       githubLink: sanitizeText(formData.step4.githubLink),
     };
-  }, [formData, sanitizeText]);
+  }, [formData, mapCareerLevelEnum, mapRoleToPositionEnum, sanitizeText]);
 
   // Navigate to next step
   const handleNext = async () => {
