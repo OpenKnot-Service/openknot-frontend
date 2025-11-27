@@ -2,6 +2,9 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  position?: string;
+  detailedPosition?: string;
+  careerLevel?: string;
   avatar?: string;
   profileImageUrl?: string;
   description?: string;

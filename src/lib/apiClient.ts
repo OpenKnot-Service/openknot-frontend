@@ -22,12 +22,25 @@ export interface ApiUserResponse {
   userId?: string;
   email: string;
   name: string;
+  position?: string;
+  detailedPosition?: string;
+  careerLevel?: string;
   profileImageUrl?: string;
   description?: string;
   githubLink?: string;
   githubUsername?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface UpdateUserRequest {
+  name?: string | null;
+  position?: string | null;
+  detailedPosition?: string | null;
+  careerLevel?: string | null;
+  profileImageUrl?: string | null;
+  description?: string | null;
+  githubLink?: string | null;
 }
 
 export interface AuthResponse {
@@ -110,6 +123,9 @@ export const normalizeUser = (user: ApiUserResponse): User => {
     id: user.id || user.userId || user.email,
     email: user.email,
     name: user.name,
+    position: user.position,
+    detailedPosition: user.detailedPosition,
+    careerLevel: user.careerLevel,
     avatar: user.profileImageUrl,
     profileImageUrl: user.profileImageUrl,
     description: user.description,
@@ -224,7 +240,7 @@ export const fetchCurrentUser = async () =>
 
 export const updateUserProfile = async (
   userId: string,
-  payload: Partial<Pick<ApiUserResponse, 'name' | 'profileImageUrl' | 'description' | 'githubLink'>>
+  payload: UpdateUserRequest
 ) =>
   normalizeUser(
     await apiRequest<ApiUserResponse>(`/users/${userId}`, {

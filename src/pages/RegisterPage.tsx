@@ -22,11 +22,7 @@ import {
   getStepDescription,
   isStepOptional,
 } from '../lib/registrationWizard';
-import {
-  saveRegistrationStep2,
-  saveRegistrationStep3,
-  saveRegistrationStep4,
-} from '../lib/apiClient';
+import { UpdateUserRequest, updateUserProfile } from '../lib/apiClient';
 import RegistrationWizardLayout from '../components/registration-wizard/RegistrationWizardLayout';
 import RegistrationStepIndicator from '../components/registration-wizard/RegistrationStepIndicator';
 import Step1BasicInfo from '../components/registration-wizard/steps/Step1BasicInfo';
@@ -142,7 +138,7 @@ const getEmptyFormData = (): RegistrationFormData => ({
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { register, login, user } = useApp();
+  const { register, login, user, refreshUser } = useApp();
   const { showToast } = useToast();
   const { hasDraft, loadDraft, clearDraft, draftLoaded } = useRegistrationDraft();
 
@@ -154,6 +150,7 @@ export default function RegisterPage() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [showPostSignupScreen, setShowPostSignupScreen] = useState(false);
   const [showAdditionalFlowNotice, setShowAdditionalFlowNotice] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(user?.id ?? null);
 
   // Auto-save draft (debounced)
   useAutoSaveDraft(formData, currentStep, completedSteps, currentStep < 5);
@@ -173,6 +170,12 @@ export default function RegisterPage() {
   useEffect(() => {
     if (user) {
       setIsRegistered(true);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.id) {
+      setCurrentUserId(user.id);
     }
   }, [user]);
 
@@ -276,6 +279,30 @@ export default function RegisterPage() {
     navigate('/dashboard');
   }, [clearDraft, navigate, showToast]);
 
+  const sanitizeText = useCallback((value?: string | null) => {
+    if (!value) return null;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }, []);
+
+  const buildUserUpdatePayload = useCallback((): UpdateUserRequest => {
+    const baseRole =
+      formData.step2.role === 'other' ? formData.step2.customRole : formData.step2.role;
+
+    const specialization = sanitizeText(formData.step2.specialization);
+    const roleDescription = sanitizeText(formData.step2.roleDescription);
+
+    return {
+      name: sanitizeText(formData.step1.name),
+      position: specialization ?? sanitizeText(baseRole),
+      detailedPosition: roleDescription ?? specialization,
+      careerLevel: sanitizeText(formData.step2.experienceLevel),
+      profileImageUrl: sanitizeText(formData.step4.profileImageUrl),
+      description: sanitizeText(formData.step4.bio) ?? roleDescription,
+      githubLink: sanitizeText(formData.step4.githubLink),
+    };
+  }, [formData, sanitizeText]);
+
   // Navigate to next step
   const handleNext = async () => {
     setIsLoading(true);
@@ -298,36 +325,36 @@ export default function RegisterPage() {
 
       if (currentStep === 1 && !isRegistered) {
         await register(formData.step1.email, formData.step1.password, formData.step1.name);
-        await login(formData.step1.email, formData.step1.password);
+        const loggedInUser = await login(formData.step1.email, formData.step1.password);
+        setCurrentUserId(loggedInUser.id);
         setIsRegistered(true);
         setShowAdditionalFlowNotice(true);
         setShowPostSignupScreen(true);
         showToast('기본 회원가입이 완료되었습니다. 추가 정보를 이어서 입력해보세요.', 'success');
       } else if (currentStep === 2) {
-        await saveRegistrationStep2({
-          role: formData.step2.role,
-          experienceLevel: formData.step2.experienceLevel,
-          specialization: formData.step2.specialization || undefined,
-          roleDescription: formData.step2.roleDescription || undefined,
-          customRole: formData.step2.customRole || undefined,
-        });
+        if (!currentUserId) {
+          showToast('로그인 정보를 확인할 수 없습니다. 다시 로그인 후 시도해주세요.', 'error');
+          return;
+        }
+        await updateUserProfile(currentUserId, buildUserUpdatePayload());
+        await refreshUser();
         setShowAdditionalFlowNotice(false);
         showToast('역할 정보가 저장되었습니다.', 'success');
       } else if (currentStep === 3) {
-        await saveRegistrationStep3({
-          skills: formData.step3.skills.map((s) => s.name),
-          interests: formData.step3.interests,
-        });
+        if (!currentUserId) {
+          showToast('로그인 정보를 확인할 수 없습니다. 다시 로그인 후 시도해주세요.', 'error');
+          return;
+        }
+        await updateUserProfile(currentUserId, buildUserUpdatePayload());
+        await refreshUser();
         showToast('스킬 정보가 저장되었습니다.', 'success');
       } else if (currentStep === 4) {
-        await saveRegistrationStep4({
-          bio: formData.step4.bio || undefined,
-          githubLink: formData.step4.githubLink || undefined,
-          githubUsername: formData.step4.githubUsername || undefined,
-          portfolioUrl: formData.step4.portfolioUrl || undefined,
-          location: formData.step4.location || undefined,
-          profileImageUrl: formData.step4.profileImageUrl || undefined,
-        });
+        if (!currentUserId) {
+          showToast('로그인 정보를 확인할 수 없습니다. 다시 로그인 후 시도해주세요.', 'error');
+          return;
+        }
+        await updateUserProfile(currentUserId, buildUserUpdatePayload());
+        await refreshUser();
         showToast('프로필 정보가 저장되었습니다.', 'success');
       }
 
