@@ -238,12 +238,9 @@ export const logoutUser = () =>
 export const fetchCurrentUser = async () =>
   normalizeUser(await apiRequest<ApiUserResponse>('/users/me'));
 
-export const updateUserProfile = async (
-  userId: string,
-  payload: UpdateUserRequest
-) =>
+export const updateUserProfile = async (payload: UpdateUserRequest) =>
   normalizeUser(
-    await apiRequest<ApiUserResponse>(`/users/${userId}`, {
+    await apiRequest<ApiUserResponse>('/users', {
       method: 'PUT',
       body: JSON.stringify(payload),
     })

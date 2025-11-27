@@ -150,7 +150,6 @@ export default function RegisterPage() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [showPostSignupScreen, setShowPostSignupScreen] = useState(false);
   const [showAdditionalFlowNotice, setShowAdditionalFlowNotice] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(user?.id ?? null);
 
   // Auto-save draft (debounced)
   useAutoSaveDraft(formData, currentStep, completedSteps, currentStep < 5);
@@ -170,12 +169,6 @@ export default function RegisterPage() {
   useEffect(() => {
     if (user) {
       setIsRegistered(true);
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user?.id) {
-      setCurrentUserId(user.id);
     }
   }, [user]);
 
@@ -325,35 +318,22 @@ export default function RegisterPage() {
 
       if (currentStep === 1 && !isRegistered) {
         await register(formData.step1.email, formData.step1.password, formData.step1.name);
-        const loggedInUser = await login(formData.step1.email, formData.step1.password);
-        setCurrentUserId(loggedInUser.id);
+        await login(formData.step1.email, formData.step1.password);
         setIsRegistered(true);
         setShowAdditionalFlowNotice(true);
         setShowPostSignupScreen(true);
         showToast('기본 회원가입이 완료되었습니다. 추가 정보를 이어서 입력해보세요.', 'success');
       } else if (currentStep === 2) {
-        if (!currentUserId) {
-          showToast('로그인 정보를 확인할 수 없습니다. 다시 로그인 후 시도해주세요.', 'error');
-          return;
-        }
-        await updateUserProfile(currentUserId, buildUserUpdatePayload());
+        await updateUserProfile(buildUserUpdatePayload());
         await refreshUser();
         setShowAdditionalFlowNotice(false);
         showToast('역할 정보가 저장되었습니다.', 'success');
       } else if (currentStep === 3) {
-        if (!currentUserId) {
-          showToast('로그인 정보를 확인할 수 없습니다. 다시 로그인 후 시도해주세요.', 'error');
-          return;
-        }
-        await updateUserProfile(currentUserId, buildUserUpdatePayload());
+        await updateUserProfile(buildUserUpdatePayload());
         await refreshUser();
         showToast('스킬 정보가 저장되었습니다.', 'success');
       } else if (currentStep === 4) {
-        if (!currentUserId) {
-          showToast('로그인 정보를 확인할 수 없습니다. 다시 로그인 후 시도해주세요.', 'error');
-          return;
-        }
-        await updateUserProfile(currentUserId, buildUserUpdatePayload());
+        await updateUserProfile(buildUserUpdatePayload());
         await refreshUser();
         showToast('프로필 정보가 저장되었습니다.', 'success');
       }
