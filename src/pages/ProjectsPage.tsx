@@ -11,10 +11,12 @@ export default function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
 
+  // TODO: 개발 중이므로 임시로 필터링 비활성화 - 실제 프로덕션에서는 사용자별 프로젝트 필터링 적용 필요
   const userProjects = useMemo(() => {
-    if (!user?.id) return projects;
-    return projects.filter((p) => p.members.some((m) => m.userId === user.id));
-  }, [projects, user?.id]);
+    // if (!user?.id) return projects;
+    // return projects.filter((p) => p.members.some((m) => m.userId === user.id));
+    return projects; // 임시: 모든 프로젝트 표시
+  }, [projects]);
 
   const filteredProjects = useMemo(() => {
     let filtered = userProjects;
