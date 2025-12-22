@@ -7,7 +7,7 @@ import { ProjectStatus } from '../types';
 
 export default function ProjectsPage() {
   const navigate = useNavigate();
-  const { projects, user } = useApp();
+  const { projects } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
 
