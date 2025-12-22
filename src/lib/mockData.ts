@@ -3443,7 +3443,6 @@ const productionCommits: GitHubCommit[] = [
   // Frontend commits (most recent)
   {
     sha: 'a9f2e1c',
-    repositoryId: 'repo-prod-1',
     message: 'feat: 프로젝트 대시보드 성능 최적화 (useMemo 적용)',
     author: {
       name: 'Charlie Lee',
@@ -3455,6 +3454,7 @@ const productionCommits: GitHubCommit[] = [
       email: 'charlie@example.com',
     },
     date: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    parents: ['e7b4c2d'],
     branch: ['main'],
     stats: { additions: 87, deletions: 43, total: 130 },
     files: [
@@ -3464,7 +3464,6 @@ const productionCommits: GitHubCommit[] = [
   },
   {
     sha: 'e7b4c2d',
-    repositoryId: 'repo-prod-1',
     message: 'fix: 알림 센터 스크롤 버그 수정',
     author: {
       name: 'Charlie Lee',
@@ -3476,13 +3475,13 @@ const productionCommits: GitHubCommit[] = [
       email: 'charlie@example.com',
     },
     date: new Date(Date.now() - 8 * 60 * 60 * 1000),
+    parents: ['c3a8f9e'],
     branch: ['main'],
     stats: { additions: 12, deletions: 5, total: 17 },
-    files: [{ filename: 'src/components/NotificationCenter.tsx', additions: 12, deletions: 5, status: 'modified' }],
+    files: [{ filename: 'src/components/NotificationCenter.tsx', additions: 12, deletions: 5, changes: 17, status: 'modified' }],
   },
   {
     sha: 'c3a8f9e',
-    repositoryId: 'repo-prod-1',
     message: 'feat: GitHub 파일 트리 뷰어 구현',
     author: {
       name: 'Charlie Lee',
@@ -3494,6 +3493,7 @@ const productionCommits: GitHubCommit[] = [
       email: 'charlie@example.com',
     },
     date: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    parents: [],
     branch: ['main'],
     stats: { additions: 456, deletions: 23, total: 479 },
     files: [
@@ -3504,7 +3504,6 @@ const productionCommits: GitHubCommit[] = [
   // Backend commits
   {
     sha: 'b8d3c4f',
-    repositoryId: 'repo-prod-2',
     message: 'fix: Redis 연결 풀 설정 최적화',
     author: {
       name: 'Eve Jung',
@@ -3516,13 +3515,13 @@ const productionCommits: GitHubCommit[] = [
       email: 'eve@example.com',
     },
     date: new Date(Date.now() - 4 * 60 * 60 * 1000),
+    parents: [],
     branch: ['main'],
     stats: { additions: 15, deletions: 8, total: 23 },
-    files: [{ filename: 'src/main/kotlin/config/RedisConfig.kt', additions: 15, deletions: 8, status: 'modified' }],
+    files: [{ filename: 'src/main/kotlin/config/RedisConfig.kt', additions: 15, deletions: 8, changes: 23, status: 'modified' }],
   },
   {
     sha: 'd4e1c7a',
-    repositoryId: 'repo-prod-2',
     message: 'feat: Redis 캐싱 레이어 추가',
     author: {
       name: 'Eve Jung',
@@ -3534,6 +3533,7 @@ const productionCommits: GitHubCommit[] = [
       email: 'eve@example.com',
     },
     date: new Date(Date.now() - 72 * 60 * 60 * 1000),
+    parents: [],
     branch: ['feature/redis-cache'],
     stats: { additions: 324, deletions: 67, total: 391 },
     files: [
@@ -3545,7 +3545,6 @@ const productionCommits: GitHubCommit[] = [
   // Mobile commits
   {
     sha: 'c7e5a2b',
-    repositoryId: 'repo-prod-3',
     message: 'fix: Android 푸시 알림 버그 수정',
     author: {
       name: 'Yoon Jiyoung',
@@ -3557,6 +3556,7 @@ const productionCommits: GitHubCommit[] = [
       email: 'yoon@example.com',
     },
     date: new Date(Date.now() - 6 * 60 * 60 * 1000),
+    parents: [],
     branch: ['hotfix/android-push-notification'],
     stats: { additions: 56, deletions: 32, total: 88 },
     files: [
@@ -3566,7 +3566,6 @@ const productionCommits: GitHubCommit[] = [
   },
   {
     sha: 'f2a9c1b',
-    repositoryId: 'repo-prod-3',
     message: 'feat: 오프라인 모드 구현 (AsyncStorage)',
     author: {
       name: 'Yoon Jiyoung',
@@ -3578,6 +3577,7 @@ const productionCommits: GitHubCommit[] = [
       email: 'yoon@example.com',
     },
     date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    parents: [],
     branch: ['feature/offline-mode'],
     stats: { additions: 567, deletions: 89, total: 656 },
     files: [
@@ -3589,21 +3589,18 @@ const productionCommits: GitHubCommit[] = [
   // Infrastructure commits
   {
     sha: 'd9a1f8e',
-    repositoryId: 'repo-prod-4',
     message: 'chore: Kubernetes 1.28 마이그레이션 준비',
     author: {
       name: 'Kang Minsu',
       email: 'kang@example.com',
-      username: 'kang-devops',
       avatarUrl: 'https://i.pravatar.cc/150?img=6',
     },
     committer: {
       name: 'Kang Minsu',
       email: 'kang@example.com',
-      username: 'kang-devops',
-      avatarUrl: 'https://i.pravatar.cc/150?img=6',
     },
     date: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    parents: [],
     branch: ['upgrade/k8s-1.28'],
     stats: { additions: 145, deletions: 98, total: 243 },
     files: [
@@ -3643,6 +3640,7 @@ const productionPRs: GitHubPullRequest[] = [
         filename: 'src/pages/DashboardPage.tsx',
         additions: 87,
         deletions: 43,
+        changes: 130,
         status: 'modified',
         patch: '@@ -15,7 +15,10 @@\n...',
       },
@@ -3651,6 +3649,7 @@ const productionPRs: GitHubPullRequest[] = [
     linkedIssues: [18],
     createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
     updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+    assignees: [],
   },
   {
     id: 'pr-prod-2',
@@ -3677,10 +3676,11 @@ const productionPRs: GitHubPullRequest[] = [
       { id: 'check-prod-4', name: 'Build', status: 'completed', conclusion: 'success' },
       { id: 'check-prod-5', name: 'Tests', status: 'completed', conclusion: 'failure' },
     ],
-    files: [{ filename: 'src/contexts/ThemeContext.tsx', additions: 42, deletions: 18, status: 'modified' }],
+    files: [{ filename: 'src/contexts/ThemeContext.tsx', additions: 42, deletions: 18, changes: 60, status: 'modified' }],
     linkedIssues: [22],
     createdAt: new Date(Date.now() - 36 * 60 * 60 * 1000),
     updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    assignees: [],
     reviewActivities: [
       {
         reviewer: 'alice-dev',
@@ -3720,6 +3720,7 @@ const productionPRs: GitHubPullRequest[] = [
     linkedIssues: [15],
     createdAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
     updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
+    assignees: [],
   },
   {
     id: 'pr-prod-4',
@@ -3750,6 +3751,7 @@ const productionPRs: GitHubPullRequest[] = [
     linkedIssues: [31],
     createdAt: new Date(Date.now() - 18 * 60 * 60 * 1000),
     updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+    assignees: [],
   },
   {
     id: 'pr-prod-5',
@@ -3777,6 +3779,7 @@ const productionPRs: GitHubPullRequest[] = [
     linkedIssues: [],
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    assignees: [],
   },
   {
     id: 'pr-prod-6',
@@ -3806,6 +3809,7 @@ const productionPRs: GitHubPullRequest[] = [
     linkedIssues: [8],
     createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
     updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    assignees: [],
   },
   // Merged PRs
   {
@@ -3837,6 +3841,7 @@ const productionPRs: GitHubPullRequest[] = [
     mergedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
     updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    assignees: [],
   },
   {
     id: 'pr-prod-8',
@@ -3861,6 +3866,7 @@ const productionPRs: GitHubPullRequest[] = [
     mergedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    assignees: [],
   },
   {
     id: 'pr-prod-9',
@@ -3885,6 +3891,7 @@ const productionPRs: GitHubPullRequest[] = [
     mergedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
     updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    assignees: [],
   },
 ];
 
@@ -4745,78 +4752,78 @@ const productionDeploymentHistory: DeploymentHistoryItem[] = [
     repositoryId: 'repo-prod-1',
     repositoryName: 'Frontend',
     environment: 'production',
-    commit: 'a9f2e1c',
+    commitHash: 'a9f2e1c',
+    commitMessage: 'feat: 프로젝트 대시보드 성능 최적화 (useMemo 적용)',
     branch: 'main',
     deployedBy: 'alice-dev',
     deployedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
     status: 'success',
     duration: 135,
-    url: 'https://openknot.app',
   },
   {
     id: 'deploy-prod-2',
     repositoryId: 'repo-prod-2',
     repositoryName: 'Backend API',
     environment: 'production',
-    commit: 'b8d3c4f',
+    commitHash: 'b8d3c4f',
+    commitMessage: 'fix: Redis 연결 풀 설정 최적화',
     branch: 'main',
     deployedBy: 'eve-backend',
     deployedAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
     status: 'success',
     duration: 245,
-    url: 'https://api.openknot.app',
   },
   {
     id: 'deploy-prod-3',
     repositoryId: 'repo-prod-1',
     repositoryName: 'Frontend',
     environment: 'dev',
-    commit: 'e7b4c2d',
+    commitHash: 'e7b4c2d',
+    commitMessage: 'fix: 알림 센터 스크롤 버그 수정',
     branch: 'develop',
     deployedBy: 'charlie-fe',
     deployedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
     status: 'success',
     duration: 128,
-    url: 'https://dev.openknot.app',
   },
   {
     id: 'deploy-prod-4',
     repositoryId: 'repo-prod-2',
     repositoryName: 'Backend API',
     environment: 'staging',
-    commit: 'd4e1c7a',
+    commitHash: 'd4e1c7a',
+    commitMessage: 'feat: Redis 캐싱 레이어 추가',
     branch: 'feature/redis-cache',
     deployedBy: 'eve-backend',
     deployedAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
     status: 'failed',
     duration: 87,
-    url: 'https://staging-api.openknot.app',
   },
   {
     id: 'deploy-prod-5',
     repositoryId: 'repo-prod-1',
     repositoryName: 'Frontend',
     environment: 'staging',
-    commit: 'e3f7a9b',
+    commitHash: 'e3f7a9b',
+    commitMessage: 'feat: 알림 스택 애니메이션 개선',
     branch: 'develop',
     deployedBy: 'charlie-fe',
     deployedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
     status: 'success',
     duration: 142,
-    url: 'https://staging.openknot.app',
   },
   {
     id: 'deploy-prod-6',
     repositoryId: 'repo-prod-3',
     repositoryName: 'Mobile App',
     environment: 'production',
-    commit: 'c7e5a2b',
+    commitHash: 'c7e5a2b',
+    commitMessage: 'fix: Android 푸시 알림 버그 수정',
     branch: 'main',
     deployedBy: 'yoon-mobile',
     deployedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
     status: 'success',
     duration: 385,
-    url: 'v2.3.1 (App Store & Play Store)',
   },
   // Additional history
   {
@@ -4824,26 +4831,26 @@ const productionDeploymentHistory: DeploymentHistoryItem[] = [
     repositoryId: 'repo-prod-2',
     repositoryName: 'Backend API',
     environment: 'production',
-    commit: 'd4e1c7a',
+    commitHash: 'd4e1c7a',
+    commitMessage: 'feat: Redis 캐싱 레이어 추가',
     branch: 'main',
     deployedBy: 'eve-backend',
     deployedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     status: 'success',
     duration: 256,
-    url: 'https://api.openknot.app',
   },
   {
     id: 'deploy-prod-8',
     repositoryId: 'repo-prod-1',
     repositoryName: 'Frontend',
     environment: 'production',
-    commit: 'c3a8f9e',
+    commitHash: 'c3a8f9e',
+    commitMessage: 'feat: GitHub 파일 트리 뷰어 구현',
     branch: 'main',
     deployedBy: 'charlie-fe',
     deployedAt: new Date(Date.now() - 25 * 60 * 60 * 1000),
     status: 'success',
     duration: 148,
-    url: 'https://openknot.app',
   },
 ];
 
