@@ -1394,11 +1394,13 @@ export const mockPullRequests: GitHubPullRequest[] = [
     assignees: ['charlie-fe'],
     reviewers: [
       {
-          avatarUrl: 'https://i.pravatar.cc/150?img=3',
+        username: 'charlie-fe',
+        avatarUrl: 'https://i.pravatar.cc/150?img=3',
         status: 'approved',
       },
       {
-          avatarUrl: 'https://i.pravatar.cc/150?img=5',
+        username: 'eve-backend',
+        avatarUrl: 'https://i.pravatar.cc/150?img=5',
         status: 'pending',
       },
     ],
@@ -1685,6 +1687,7 @@ export const mockPullRequests: GitHubPullRequest[] = [
     body: '## 요약\n\nGitKraken 스타일의 커밋 시각화를 위한 커스텀 D3 구현입니다.\n\n## 기능\n- 분기/병합 라인\n- 줌 및 패닝\n- 브랜치/작성자별 필터\n- 클릭 시 커밋 상세 보기',
     state: 'open',
     author: {
+      username: 'charlie-fe',
       avatarUrl: 'https://i.pravatar.cc/150?img=3',
     },
     assignees: [],
@@ -1894,6 +1897,7 @@ export const mockPullRequests: GitHubPullRequest[] = [
     body: '## 문제\n\n토큰이 24시간이 아닌 1시간 후에 만료되고 있었습니다.\n\n## 해결\n\nJWT 설정을 수정해 올바른 만료 시간을 사용하도록 했습니다.',
     state: 'merged',
     author: {
+      username: 'eve-backend',
       avatarUrl: 'https://i.pravatar.cc/150?img=5',
     },
     assignees: [],
@@ -2021,6 +2025,7 @@ export const mockIssues: GitHubIssue[] = [
     body: '커밋 이력이 많아지면 D3 그래프가 느려집니다. 가상화나 페이지네이션이 필요합니다.',
     state: 'open',
     author: {
+      username: 'charlie-fe',
       avatarUrl: 'https://i.pravatar.cc/150?img=3',
     },
     assignees: [],
@@ -3454,7 +3459,7 @@ const productionCommits: GitHubCommit[] = [
     stats: { additions: 87, deletions: 43, total: 130 },
     files: [
       { filename:'src/pages/DashboardPage.tsx', additions: 42, deletions: 18, changes: 60, status: 'modified' },
-      { filename:'src/components/ProjectCard.tsx', additions: 45, deletions: 25, status: 'modified' },
+      { filename:'src/components/ProjectCard.tsx', additions: 45, deletions: 25, changes: 70, status: 'modified' },
     ],
   },
   {
@@ -3492,8 +3497,8 @@ const productionCommits: GitHubCommit[] = [
     branch: ['main'],
     stats: { additions: 456, deletions: 23, total: 479 },
     files: [
-      { filename:'src/components/github/FileTreeViewer.tsx', additions: 320, deletions: 0, status: 'added' },
-      { filename:'src/components/github/FileContent.tsx', additions: 136, deletions: 23, status: 'modified' },
+      { filename:'src/components/github/FileTreeViewer.tsx', additions: 320, deletions: 0, changes: 320, status: 'added' },
+      { filename:'src/components/github/FileContent.tsx', additions: 136, deletions: 23, changes: 159, status: 'modified' },
     ],
   },
   // Backend commits
@@ -3532,9 +3537,9 @@ const productionCommits: GitHubCommit[] = [
     branch: ['feature/redis-cache'],
     stats: { additions: 324, deletions: 67, total: 391 },
     files: [
-      { filename:'src/main/kotlin/service/CacheService.kt', additions: 185, deletions: 0, status: 'added' },
-      { filename:'src/main/kotlin/config/RedisConfig.kt', additions: 95, deletions: 45, status: 'modified' },
-      { filename:'src/main/kotlin/service/ProjectService.kt', additions: 44, deletions: 22, status: 'modified' },
+      { filename:'src/main/kotlin/service/CacheService.kt', additions: 185, deletions: 0, changes: 185, status: 'added' },
+      { filename:'src/main/kotlin/config/RedisConfig.kt', additions: 95, deletions: 45, changes: 140, status: 'modified' },
+      { filename:'src/main/kotlin/service/ProjectService.kt', additions: 44, deletions: 22, changes: 66, status: 'modified' },
     ],
   },
   // Mobile commits
@@ -3555,8 +3560,8 @@ const productionCommits: GitHubCommit[] = [
     branch: ['hotfix/android-push-notification'],
     stats: { additions: 56, deletions: 32, total: 88 },
     files: [
-      { filename:'src/services/pushNotifications.ts', additions: 45, deletions: 28, status: 'modified' },
-      { filename:'android/app/src/main/AndroidManifest.xml', additions: 11, deletions: 4, status: 'modified' },
+      { filename:'src/services/pushNotifications.ts', additions: 45, deletions: 28, changes: 73, status: 'modified' },
+      { filename:'android/app/src/main/AndroidManifest.xml', additions: 11, deletions: 4, changes: 15, status: 'modified' },
     ],
   },
   {
@@ -3576,9 +3581,9 @@ const productionCommits: GitHubCommit[] = [
     branch: ['feature/offline-mode'],
     stats: { additions: 567, deletions: 89, total: 656 },
     files: [
-      { filename:'src/services/offlineQueue.ts', additions: 234, deletions: 0, status: 'added' },
-      { filename:'src/services/syncManager.ts', additions: 198, deletions: 0, status: 'added' },
-      { filename:'src/contexts/OfflineContext.tsx', additions: 135, deletions: 89, status: 'modified' },
+      { filename:'src/services/offlineQueue.ts', additions: 234, deletions: 0, changes: 234, status: 'added' },
+      { filename:'src/services/syncManager.ts', additions: 198, deletions: 0, changes: 198, status: 'added' },
+      { filename:'src/contexts/OfflineContext.tsx', additions: 135, deletions: 89, changes: 224, status: 'modified' },
     ],
   },
   // Infrastructure commits
@@ -3602,8 +3607,8 @@ const productionCommits: GitHubCommit[] = [
     branch: ['upgrade/k8s-1.28'],
     stats: { additions: 145, deletions: 98, total: 243 },
     files: [
-      { filename:'terraform/k8s-cluster.tf', additions: 87, deletions: 65, status: 'modified' },
-      { filename:'helm/values.yaml', additions: 58, deletions: 33, status: 'modified' },
+      { filename:'terraform/k8s-cluster.tf', additions: 87, deletions: 65, changes: 152, status: 'modified' },
+      { filename:'helm/values.yaml', additions: 58, deletions: 33, changes: 91, status: 'modified' },
     ],
   },
 ];
@@ -3641,7 +3646,7 @@ const productionPRs: GitHubPullRequest[] = [
         status: 'modified',
         patch: '@@ -15,7 +15,10 @@\n...',
       },
-      { filename:'src/components/ProjectCard.tsx', additions: 100, deletions: 52, status: 'modified', patch: '@@ ...' },
+      { filename:'src/components/ProjectCard.tsx', additions: 100, deletions: 52, changes: 152, status: 'modified', patch: '@@ ...' },
     ],
     linkedIssues: [18],
     createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
@@ -3708,9 +3713,9 @@ const productionPRs: GitHubPullRequest[] = [
       { id: 'check-prod-7', name: 'Integration Tests', status: 'in_progress' },
     ],
     filesChanged: [
-      { filename:'src/main/kotlin/service/CacheService.kt', additions: 185, deletions: 0, status: 'added' },
-      { filename:'src/main/kotlin/config/RedisConfig.kt', additions: 95, deletions: 45, status: 'modified' },
-      { filename:'src/main/kotlin/service/ProjectService.kt', additions: 44, deletions: 22, status: 'modified' },
+      { filename:'src/main/kotlin/service/CacheService.kt', additions: 185, deletions: 0, changes: 185, status: 'added' },
+      { filename:'src/main/kotlin/config/RedisConfig.kt', additions: 95, deletions: 45, changes: 140, status: 'modified' },
+      { filename:'src/main/kotlin/service/ProjectService.kt', additions: 44, deletions: 22, changes: 66, status: 'modified' },
     ],
     linkedIssues: [15],
     createdAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
@@ -3739,8 +3744,8 @@ const productionPRs: GitHubPullRequest[] = [
       { id: 'check-prod-9', name: 'iOS Build', status: 'completed', conclusion: 'success' },
     ],
     filesChanged: [
-      { filename:'src/services/pushNotifications.ts', additions: 45, deletions: 28, status: 'modified' },
-      { filename:'android/app/src/main/AndroidManifest.xml', additions: 11, deletions: 4, status: 'modified' },
+      { filename:'src/services/pushNotifications.ts', additions: 45, deletions: 28, changes: 73, status: 'modified' },
+      { filename:'android/app/src/main/AndroidManifest.xml', additions: 11, deletions: 4, changes: 15, status: 'modified' },
     ],
     linkedIssues: [31],
     createdAt: new Date(Date.now() - 18 * 60 * 60 * 1000),
@@ -3765,9 +3770,9 @@ const productionPRs: GitHubPullRequest[] = [
     deletions: 89,
     checks: [{ id: 'check-prod-10', name: 'Build', status: 'in_progress' }],
     filesChanged: [
-      { filename:'src/services/offlineQueue.ts', additions: 234, deletions: 0, status: 'added' },
-      { filename:'src/services/syncManager.ts', additions: 198, deletions: 0, status: 'added' },
-      { filename:'src/contexts/OfflineContext.tsx', additions: 135, deletions: 89, status: 'modified' },
+      { filename:'src/services/offlineQueue.ts', additions: 234, deletions: 0, changes: 234, status: 'added' },
+      { filename:'src/services/syncManager.ts', additions: 198, deletions: 0, changes: 198, status: 'added' },
+      { filename:'src/contexts/OfflineContext.tsx', additions: 135, deletions: 89, changes: 224, status: 'modified' },
     ],
     linkedIssues: [],
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
@@ -3795,8 +3800,8 @@ const productionPRs: GitHubPullRequest[] = [
       { id: 'check-prod-12', name: 'Security Scan', status: 'completed', conclusion: 'success' },
     ],
     filesChanged: [
-      { filename:'terraform/k8s-cluster.tf', additions: 87, deletions: 65, status: 'modified' },
-      { filename:'helm/values.yaml', additions: 58, deletions: 33, status: 'modified' },
+      { filename:'terraform/k8s-cluster.tf', additions: 87, deletions: 65, changes: 152, status: 'modified' },
+      { filename:'helm/values.yaml', additions: 58, deletions: 33, changes: 91, status: 'modified' },
     ],
     linkedIssues: [8],
     createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000),
@@ -3825,8 +3830,8 @@ const productionPRs: GitHubPullRequest[] = [
       { id: 'check-prod-14', name: 'Tests', status: 'completed', conclusion: 'success' },
     ],
     filesChanged: [
-      { filename:'src/components/github/FileTreeViewer.tsx', additions: 320, deletions: 0, status: 'added' },
-      { filename:'src/components/github/FileContent.tsx', additions: 136, deletions: 23, status: 'modified' },
+      { filename:'src/components/github/FileTreeViewer.tsx', additions: 320, deletions: 0, changes: 320, status: 'added' },
+      { filename:'src/components/github/FileContent.tsx', additions: 136, deletions: 23, changes: 159, status: 'modified' },
     ],
     linkedIssues: [],
     mergedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
@@ -3903,12 +3908,14 @@ const productionIssues: GitHubIssue[] = [
         author: 'alice-dev',
         body: '로그를 확인해보니 데이터베이스 트랜잭션 타임아웃 문제로 보입니다. 백엔드 팀과 협업해서 해결하겠습니다.',
         createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
       },
       {
         id: 'comment-prod-2',
         author: 'eve-backend',
         body: '백엔드 로그를 보니 Redis 연결이 간헐적으로 끊기는 것 같아요. 연결 풀 설정을 조정해보겠습니다.',
         createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
       },
     ],
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
@@ -3931,6 +3938,7 @@ const productionIssues: GitHubIssue[] = [
         author: 'eve-backend',
         body: 'Redis 캐싱 레이어를 추가하는 PR을 올렸습니다. 이것으로 응답 시간을 크게 개선할 수 있을 것 같습니다. #89',
         createdAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
       },
     ],
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
@@ -3953,6 +3961,7 @@ const productionIssues: GitHubIssue[] = [
         author: 'yoon-mobile',
         body: 'FCM 토큰 갱신 로직에 문제가 있었습니다. 긴급 수정 PR을 올렸습니다. #45',
         createdAt: new Date(Date.now() - 18 * 60 * 60 * 1000),
+        updatedAt: new Date(Date.now() - 18 * 60 * 60 * 1000),
       },
     ],
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
