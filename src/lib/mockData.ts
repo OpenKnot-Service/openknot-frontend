@@ -3478,7 +3478,7 @@ const productionCommits: GitHubCommit[] = [
     date: new Date(Date.now() - 8 * 60 * 60 * 1000),
     branch: ['main'],
     stats: { additions: 12, deletions: 5, total: 17 },
-    files: [{ path: 'src/components/NotificationCenter.tsx', additions: 12, deletions: 5, status: 'modified' }],
+    files: [{ filename: 'src/components/NotificationCenter.tsx', additions: 12, deletions: 5, status: 'modified' }],
   },
   {
     sha: 'c3a8f9e',
@@ -3518,7 +3518,7 @@ const productionCommits: GitHubCommit[] = [
     date: new Date(Date.now() - 4 * 60 * 60 * 1000),
     branch: ['main'],
     stats: { additions: 15, deletions: 8, total: 23 },
-    files: [{ path: 'src/main/kotlin/config/RedisConfig.kt', additions: 15, deletions: 8, status: 'modified' }],
+    files: [{ filename: 'src/main/kotlin/config/RedisConfig.kt', additions: 15, deletions: 8, status: 'modified' }],
   },
   {
     sha: 'd4e1c7a',
@@ -3638,9 +3638,9 @@ const productionPRs: GitHubPullRequest[] = [
       { id: 'check-prod-2', name: 'Tests', status: 'completed', conclusion: 'success' },
       { id: 'check-prod-3', name: 'Lint', status: 'completed', conclusion: 'success' },
     ],
-    filesChanged: [
+    files: [
       {
-        path: 'src/pages/DashboardPage.tsx',
+        filename: 'src/pages/DashboardPage.tsx',
         additions: 87,
         deletions: 43,
         status: 'modified',
@@ -3677,7 +3677,7 @@ const productionPRs: GitHubPullRequest[] = [
       { id: 'check-prod-4', name: 'Build', status: 'completed', conclusion: 'success' },
       { id: 'check-prod-5', name: 'Tests', status: 'completed', conclusion: 'failure' },
     ],
-    filesChanged: [{ path: 'src/contexts/ThemeContext.tsx', additions: 42, deletions: 18, status: 'modified' }],
+    files: [{ filename: 'src/contexts/ThemeContext.tsx', additions: 42, deletions: 18, status: 'modified' }],
     linkedIssues: [22],
     createdAt: new Date(Date.now() - 36 * 60 * 60 * 1000),
     updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
@@ -3712,7 +3712,7 @@ const productionPRs: GitHubPullRequest[] = [
       { id: 'check-prod-6', name: 'Backend Tests', status: 'completed', conclusion: 'success' },
       { id: 'check-prod-7', name: 'Integration Tests', status: 'in_progress' },
     ],
-    filesChanged: [
+    files: [
       { filename:'src/main/kotlin/service/CacheService.kt', additions: 185, deletions: 0, changes: 185, status: 'added' },
       { filename:'src/main/kotlin/config/RedisConfig.kt', additions: 95, deletions: 45, changes: 140, status: 'modified' },
       { filename:'src/main/kotlin/service/ProjectService.kt', additions: 44, deletions: 22, changes: 66, status: 'modified' },
@@ -3743,7 +3743,7 @@ const productionPRs: GitHubPullRequest[] = [
       { id: 'check-prod-8', name: 'Android Build', status: 'completed', conclusion: 'success' },
       { id: 'check-prod-9', name: 'iOS Build', status: 'completed', conclusion: 'success' },
     ],
-    filesChanged: [
+    files: [
       { filename:'src/services/pushNotifications.ts', additions: 45, deletions: 28, changes: 73, status: 'modified' },
       { filename:'android/app/src/main/AndroidManifest.xml', additions: 11, deletions: 4, changes: 15, status: 'modified' },
     ],
@@ -3769,7 +3769,7 @@ const productionPRs: GitHubPullRequest[] = [
     additions: 567,
     deletions: 89,
     checks: [{ id: 'check-prod-10', name: 'Build', status: 'in_progress' }],
-    filesChanged: [
+    files: [
       { filename:'src/services/offlineQueue.ts', additions: 234, deletions: 0, changes: 234, status: 'added' },
       { filename:'src/services/syncManager.ts', additions: 198, deletions: 0, changes: 198, status: 'added' },
       { filename:'src/contexts/OfflineContext.tsx', additions: 135, deletions: 89, changes: 224, status: 'modified' },
@@ -3799,7 +3799,7 @@ const productionPRs: GitHubPullRequest[] = [
       { id: 'check-prod-11', name: 'Terraform Plan', status: 'completed', conclusion: 'success' },
       { id: 'check-prod-12', name: 'Security Scan', status: 'completed', conclusion: 'success' },
     ],
-    filesChanged: [
+    files: [
       { filename:'terraform/k8s-cluster.tf', additions: 87, deletions: 65, changes: 152, status: 'modified' },
       { filename:'helm/values.yaml', additions: 58, deletions: 33, changes: 91, status: 'modified' },
     ],
@@ -3829,7 +3829,7 @@ const productionPRs: GitHubPullRequest[] = [
       { id: 'check-prod-13', name: 'Build', status: 'completed', conclusion: 'success' },
       { id: 'check-prod-14', name: 'Tests', status: 'completed', conclusion: 'success' },
     ],
-    filesChanged: [
+    files: [
       { filename:'src/components/github/FileTreeViewer.tsx', additions: 320, deletions: 0, changes: 320, status: 'added' },
       { filename:'src/components/github/FileContent.tsx', additions: 136, deletions: 23, changes: 159, status: 'modified' },
     ],
@@ -3856,7 +3856,7 @@ const productionPRs: GitHubPullRequest[] = [
     additions: 123,
     deletions: 87,
     checks: [],
-    filesChanged: [],
+    files: [],
     linkedIssues: [],
     mergedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
@@ -3880,7 +3880,7 @@ const productionPRs: GitHubPullRequest[] = [
     additions: 587,
     deletions: 123,
     checks: [],
-    filesChanged: [],
+    files: [],
     linkedIssues: [],
     mergedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
