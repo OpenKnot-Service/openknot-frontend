@@ -24,9 +24,9 @@ interface VerticalCommitGraphProps {
   onTransformChange: (transform: d3.ZoomTransform) => void;
 }
 
-const NODE_RADIUS = 3;
-const SELECTED_NODE_RADIUS = 5;
-const LINE_WIDTH = 1;
+const NODE_RADIUS = 2;
+const SELECTED_NODE_RADIUS = 4;
+const LINE_WIDTH = 1.5;
 const BRANCH_SPACING = 25;
 
 export default function VerticalCommitGraph({
@@ -129,7 +129,7 @@ export default function VerticalCommitGraph({
           .attr('stroke', node.color)
           .attr('stroke-width', LINE_WIDTH)
           .attr('fill', 'none')
-          .attr('opacity', 0.5); // Brighter for dark mode
+          .attr('opacity', 0.8); // Brighter for better visibility
       });
     });
 

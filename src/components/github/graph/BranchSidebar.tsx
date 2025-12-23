@@ -42,11 +42,11 @@ function getBranchIcon(type: BranchType) {
 function getBranchStyles(type: BranchType) {
   switch (type) {
     case 'main':
-      return { fontSize: '14px', fontWeight: '700', iconSize: 18 };
+      return { fontSize: '13px', fontWeight: '700', iconSize: 16 };
     case 'develop':
-      return { fontSize: '13px', fontWeight: '600', iconSize: 16 };
+      return { fontSize: '12px', fontWeight: '600', iconSize: 14 };
     default:
-      return { fontSize: '12px', fontWeight: '400', iconSize: 14 };
+      return { fontSize: '11px', fontWeight: '400', iconSize: 12 };
   }
 }
 
@@ -57,8 +57,8 @@ export default function BranchSidebar({
   onBranchClick,
 }: BranchSidebarProps) {
   return (
-    <div className="h-full overflow-y-auto py-4 bg-gray-50 dark:bg-gray-900/50 border-r border-gray-200 dark:border-gray-700">
-      <h3 className="px-4 mb-3 text-sm font-semibold text-gray-900 dark:text-white">
+    <div className="h-full overflow-y-auto py-2 bg-gray-50 dark:bg-gray-900/50 border-r border-gray-200 dark:border-gray-700">
+      <h3 className="px-3 mb-2 text-xs font-semibold text-gray-900 dark:text-white">
         Branches
       </h3>
       <div className="space-y-1">
@@ -73,7 +73,7 @@ export default function BranchSidebar({
               key={branch.name}
               onClick={() => onBranchClick(branch.name)}
               className={`
-                w-full flex items-center gap-2 px-4 py-2
+                w-full flex items-center gap-2 px-3 py-1.5
                 transition-colors text-left
                 ${
                   isSelected
@@ -84,7 +84,7 @@ export default function BranchSidebar({
             >
               {/* Color indicator */}
               <div
-                className="w-3 h-3 rounded-full shrink-0"
+                className="w-2 h-2 rounded-full shrink-0"
                 style={{ backgroundColor: branch.color }}
               />
 

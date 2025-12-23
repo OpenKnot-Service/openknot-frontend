@@ -32,8 +32,8 @@ export default function CommitInfoPanel({
   };
 
   return (
-    <div className="h-full overflow-y-auto py-4 bg-gray-50 dark:bg-gray-900/50 border-l border-gray-200 dark:border-gray-700">
-      <h3 className="px-4 mb-3 text-sm font-semibold text-gray-900 dark:text-white">
+    <div className="h-full overflow-y-auto py-2 bg-gray-50 dark:bg-gray-900/50 border-l border-gray-200 dark:border-gray-700">
+      <h3 className="px-3 mb-2 text-xs font-semibold text-gray-900 dark:text-white">
         Commit History
       </h3>
       <div className="space-y-0">
@@ -45,7 +45,7 @@ export default function CommitInfoPanel({
             <div
               key={commit.sha}
               className={`
-                px-4 py-3 cursor-pointer
+                px-3 py-2 cursor-pointer
                 transition-colors border-l-2
                 ${
                   isSelected
@@ -59,12 +59,12 @@ export default function CommitInfoPanel({
               }}
             >
               {/* Commit Message */}
-              <div className="text-sm font-medium text-gray-900 dark:text-white mb-1.5 line-clamp-2">
+              <div className="text-xs font-medium text-gray-900 dark:text-white mb-1 line-clamp-2">
                 {commit.message}
               </div>
 
               {/* SHA + Timestamp */}
-              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-1">
                   <code className="font-mono bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">
                     {commit.sha.substring(0, 7)}

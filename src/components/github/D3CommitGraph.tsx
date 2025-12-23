@@ -27,20 +27,21 @@ interface GraphNode {
 }
 
 // Branch color mapping (light mode / dark mode)
+// Dark mode uses brighter neon colors for better visibility
 const branchColors: Record<string, { light: string; dark: string }> = {
-  main: { light: '#2563eb', dark: '#60a5fa' },      // blue
-  master: { light: '#2563eb', dark: '#60a5fa' },    // blue
-  develop: { light: '#9333ea', dark: '#c084fc' },   // purple
-  development: { light: '#9333ea', dark: '#c084fc' }, // purple
+  main: { light: '#2563eb', dark: '#3b82f6' },      // bright blue
+  master: { light: '#2563eb', dark: '#3b82f6' },    // bright blue
+  develop: { light: '#9333ea', dark: '#a855f7' },   // bright purple
+  development: { light: '#9333ea', dark: '#a855f7' }, // bright purple
 };
 
 const featureColors = [
-  { light: '#16a34a', dark: '#4ade80' },  // green
-  { light: '#ea580c', dark: '#fb923c' },  // orange
-  { light: '#ec4899', dark: '#f472b6' },  // pink
-  { light: '#eab308', dark: '#facc15' },  // yellow
-  { light: '#06b6d4', dark: '#22d3ee' },  // cyan
-  { light: '#8b5cf6', dark: '#a78bfa' },  // violet
+  { light: '#16a34a', dark: '#10b981' },  // bright green
+  { light: '#ea580c', dark: '#f97316' },  // bright orange
+  { light: '#ec4899', dark: '#ec4899' },  // bright pink
+  { light: '#eab308', dark: '#eab308' },  // bright yellow
+  { light: '#06b6d4', dark: '#06b6d4' },  // bright cyan
+  { light: '#8b5cf6', dark: '#8b5cf6' },  // bright violet
 ];
 
 function getBranchColor(branchName: string, isDark: boolean): string {
@@ -178,7 +179,7 @@ export default function D3CommitGraph({
       const node: GraphNode = {
         commit,
         x: column * 25 + 30,   // Branch (horizontal) - 25px between branches
-        y: index * 40 + 20,    // Time (vertical) - 40px between commits
+        y: index * 28 + 20,    // Time (vertical) - 28px between commits (compact)
         column,
         color,
         timeIndex: index,
@@ -303,7 +304,7 @@ export default function D3CommitGraph({
   };
 
   // Calculate SVG dimensions for vertical layout
-  const COMMIT_SPACING = 40;
+  const COMMIT_SPACING = 28;
   const BRANCH_SPACING = 25;
   const svgWidth = Math.max(800, graphData.branchList.length * BRANCH_SPACING + 200);
   const svgHeight = Math.max(600, graphData.nodes.length * COMMIT_SPACING + 100);
