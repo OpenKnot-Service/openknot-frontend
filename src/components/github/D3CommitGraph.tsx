@@ -177,8 +177,8 @@ export default function D3CommitGraph({
 
       const node: GraphNode = {
         commit,
-        x: index * 40 + 30,    // Time (horizontal) - 40px between commits
-        y: column * 25 + 20,   // Branch (vertical) - 25px between branches
+        x: column * 25 + 30,   // Branch (horizontal) - 25px between branches
+        y: index * 40 + 20,    // Time (vertical) - 40px between commits
         column,
         color,
         timeIndex: index,
@@ -305,8 +305,8 @@ export default function D3CommitGraph({
   // Calculate SVG dimensions for vertical layout
   const COMMIT_SPACING = 40;
   const BRANCH_SPACING = 25;
-  const svgWidth = Math.max(800, graphData.nodes.length * COMMIT_SPACING + 200);
-  const svgHeight = Math.max(400, graphData.branchList.length * BRANCH_SPACING + 100);
+  const svgWidth = Math.max(800, graphData.branchList.length * BRANCH_SPACING + 200);
+  const svgHeight = Math.max(600, graphData.nodes.length * COMMIT_SPACING + 100);
 
   return (
     <div className="flex h-full gap-4">

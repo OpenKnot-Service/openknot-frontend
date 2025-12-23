@@ -98,12 +98,12 @@ export default function VerticalCommitGraph({
       parent: GraphNode,
       isMerge: boolean
     ): string => {
-      const isCrossBranch = Math.abs(node.y - parent.y) > BRANCH_SPACING / 2;
+      const isCrossBranch = Math.abs(node.x - parent.x) > BRANCH_SPACING / 2;
 
       if (isCrossBranch || isMerge) {
-        // Curved line using cubic Bezier
-        const midX = (node.x + parent.x) / 2;
-        return `M ${node.x} ${node.y} C ${midX} ${node.y}, ${midX} ${parent.y}, ${parent.x} ${parent.y}`;
+        // Curved line using cubic Bezier (vertical flow)
+        const midY = (node.y + parent.y) / 2;
+        return `M ${node.x} ${node.y} C ${node.x} ${midY}, ${parent.x} ${midY}, ${parent.x} ${parent.y}`;
       } else {
         // Straight line for same branch
         return `M ${node.x} ${node.y} L ${parent.x} ${parent.y}`;
