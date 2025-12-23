@@ -2,6 +2,7 @@ import { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import { GitHubCommit, GitHubBranch } from '../../types';
 import { RotateCcw, GitBranch, Code, Wrench, Flame, Bug, Tag } from 'lucide-react';
+import { Tooltip } from '../ui/Tooltip';
 
 interface D3CommitGraphProps {
   commits: GitHubCommit[];
@@ -360,8 +361,7 @@ export default function D3CommitGraph({
               return (
                 <div
                   key={branch.name}
-                  className="group flex items-center gap-2 rounded-md px-2 py-1.5 transition hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap"
-                  title={branch.name}
+                  className="group w-full flex items-center gap-2 rounded-md px-2 py-1.5 transition hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   {/* Color indicator */}
                   <div
@@ -376,16 +376,18 @@ export default function D3CommitGraph({
                     style={{ color: branch.color }}
                   />
 
-                  {/* Branch name */}
-                  <span
-                    className="truncate text-gray-900 dark:text-white max-w-[120px] lg:max-w-none"
-                    style={{
-                      fontSize: styles.fontSize,
-                      fontWeight: styles.fontWeight,
-                    }}
-                  >
-                    {branch.name}
-                  </span>
+                  {/* Branch name with Tooltip */}
+                  <Tooltip content={branch.name}>
+                    <span
+                      className="truncate text-gray-900 dark:text-white flex-1 min-w-0 block"
+                      style={{
+                        fontSize: styles.fontSize,
+                        fontWeight: styles.fontWeight,
+                      }}
+                    >
+                      {branch.name}
+                    </span>
+                  </Tooltip>
                 </div>
               );
             })}
