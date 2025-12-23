@@ -5,9 +5,17 @@ interface ProtectedRouteProps {
   children: React.ReactNode
 }
 
+// 로컬 개발 환경에서만 로그인 건너뛰기
+const SKIP_AUTH_IN_DEV = import.meta.env.DEV
+
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, isUserLoading } = useApp()
   const location = useLocation()
+
+  // 로컬 개발 환경에서는 인증 건너뛰기
+  if (SKIP_AUTH_IN_DEV) {
+    return <>{children}</>
+  }
 
   // Show loading state while checking authentication
   if (isUserLoading) {
