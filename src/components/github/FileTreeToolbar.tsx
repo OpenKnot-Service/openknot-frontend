@@ -65,10 +65,10 @@ export function FileTreeToolbar({
                     : 'text-gray-900 dark:text-white'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">{branch.name}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium truncate flex-1 min-w-0">{branch.name}</span>
                   {branch.isDefault && (
-                    <span className="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
+                    <span className="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded flex-shrink-0">
                       default
                     </span>
                   )}
