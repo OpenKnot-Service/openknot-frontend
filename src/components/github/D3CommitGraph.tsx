@@ -353,7 +353,7 @@ export default function D3CommitGraph({
       <div className="w-full lg:w-48 lg:shrink-0">
         <div className="rounded-md border border-gray-200 bg-gray-50 p-3 md:p-4 dark:border-gray-700 dark:bg-gray-900/50">
           <h3 className="mb-2 md:mb-3 text-sm font-semibold text-gray-900 dark:text-white">Branches</h3>
-          <div className="flex flex-wrap lg:flex-col gap-2 lg:space-y-0">
+          <div className="w-full flex flex-wrap lg:flex-col gap-2 lg:space-y-0">
             {graphData.branchList.map((branch) => {
               const Icon = getBranchIcon(branch.type);
               const styles = getBranchStyles(branch.type);
@@ -361,7 +361,7 @@ export default function D3CommitGraph({
               return (
                 <div
                   key={branch.name}
-                  className="group w-full flex items-center gap-2 rounded-md px-2 py-1.5 transition hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="group w-full flex items-center gap-2 rounded-md px-2 py-1.5 transition hover:bg-gray-100 dark:hover:bg-gray-800 overflow-hidden"
                 >
                   {/* Color indicator */}
                   <div
@@ -377,9 +377,9 @@ export default function D3CommitGraph({
                   />
 
                   {/* Branch name with Tooltip */}
-                  <Tooltip content={branch.name}>
+                  <Tooltip content={branch.name} className="flex-1 min-w-0">
                     <span
-                      className="truncate text-gray-900 dark:text-white flex-1 min-w-0 block"
+                      className="truncate text-gray-900 dark:text-white block"
                       style={{
                         fontSize: styles.fontSize,
                         fontWeight: styles.fontWeight,
