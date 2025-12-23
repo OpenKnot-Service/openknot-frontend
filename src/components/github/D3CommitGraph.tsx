@@ -225,7 +225,44 @@ export default function D3CommitGraph({
       return a.name.localeCompare(b.name);
     });
 
-    return { nodes, commitMap, columnAssignments, branchList };
+    // Create virtual parent relationships for orphan commits
+    const branchCommits = new Map<string, GitHubCommit[]>();
+
+    // Group commits by branch
+    filteredCommits.forEach((commit) => {
+      commit.branch.forEach((branchName) => {
+        if (!branchCommits.has(branchName)) {
+          branchCommits.set(branchName, []);
+        }
+        branchCommits.get(branchName)!.push(commit);
+      });
+    });
+
+    // Sort commits within each branch by date (newest first)
+    branchCommits.forEach((commits) => {
+      commits.sort((a, b) => b.date.getTime() - a.date.getTime());
+    });
+
+    // Create virtual parent map
+    const virtualParents = new Map<string, string>();
+
+    branchCommits.forEach((commits) => {
+      for (let i = 0; i < commits.length - 1; i++) {
+        const currentCommit = commits[i]; // newer
+        const previousCommit = commits[i + 1]; // older
+
+        // If current commit has no valid parents in commitMap, link to previous commit
+        const hasValidParent = currentCommit.parents.some(
+          (parentSha) => commitMap.has(parentSha)
+        );
+
+        if (!hasValidParent) {
+          virtualParents.set(currentCommit.sha, previousCommit.sha);
+        }
+      }
+    });
+
+    return { nodes, commitMap, columnAssignments, branchList, virtualParents };
   }, [filteredCommits, isDark]);
 
   // Handle zoom reset
@@ -271,7 +308,25 @@ export default function D3CommitGraph({
     const lines = g.append('g').attr('class', 'commit-lines');
 
     graphData.nodes.forEach((node) => {
+      const parentsToRender: string[] = [];
+
+      // Add actual parents that exist in commitMap
       node.commit.parents.forEach((parentSha) => {
+        if (graphData.commitMap.has(parentSha)) {
+          parentsToRender.push(parentSha);
+        }
+      });
+
+      // If no valid parents, add virtual parent
+      if (parentsToRender.length === 0) {
+        const virtualParent = graphData.virtualParents.get(node.commit.sha);
+        if (virtualParent && graphData.commitMap.has(virtualParent)) {
+          parentsToRender.push(virtualParent);
+        }
+      }
+
+      // Draw lines
+      parentsToRender.forEach((parentSha) => {
         const parent = graphData.commitMap.get(parentSha);
         if (parent) {
           // Determine if it's a merge (curved line) or normal (straight line)
