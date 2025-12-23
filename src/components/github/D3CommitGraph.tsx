@@ -72,6 +72,24 @@ function getBranchType(branchName: string): BranchType {
   return 'other';
 }
 
+// Get source branch for a given branch type (Git Flow)
+function getSourceBranch(type: BranchType): string | null {
+  switch (type) {
+    case 'main':
+      return null; // Main branch has no source
+    case 'develop':
+      return 'main'; // Develop branches from main
+    case 'feature':
+    case 'bugfix':
+    case 'release':
+      return 'develop'; // Feature/bugfix/release branch from develop
+    case 'hotfix':
+      return 'main'; // Hotfix branches from main
+    default:
+      return 'main'; // Other branches default to main
+  }
+}
+
 // Get icon component for branch type
 function getBranchIcon(type: BranchType) {
   switch (type) {
@@ -259,6 +277,57 @@ export default function D3CommitGraph({
         if (!hasValidParent) {
           virtualParents.set(currentCommit.sha, previousCommit.sha);
         }
+      }
+    });
+
+    // Create branch fork connections
+    branchCommits.forEach((commits, branchName) => {
+      if (commits.length === 0) return;
+
+      const branchType = getBranchType(branchName);
+      const sourceBranchName = getSourceBranch(branchType);
+
+      // Skip if no source branch (e.g., main)
+      if (!sourceBranchName) return;
+
+      // Find the oldest commit in this branch
+      const oldestCommit = commits[commits.length - 1];
+
+      // Check if it already has a valid parent
+      const hasValidParent = oldestCommit.parents.some(
+        (parentSha) => commitMap.has(parentSha)
+      );
+
+      // If already has parent or virtual parent, skip
+      if (hasValidParent || virtualParents.has(oldestCommit.sha)) return;
+
+      // Find source branch commits (try alternatives for main/master, develop/development)
+      let sourceCommits = branchCommits.get(sourceBranchName);
+      if (!sourceCommits || sourceCommits.length === 0) {
+        if (sourceBranchName === 'main') {
+          sourceCommits = branchCommits.get('master');
+        } else if (sourceBranchName === 'develop') {
+          sourceCommits = branchCommits.get('development');
+        }
+      }
+
+      if (!sourceCommits || sourceCommits.length === 0) return;
+
+      // Find the best fork point in source branch
+      // (closest commit before the oldest commit in current branch)
+      let forkPoint: GitHubCommit | null = null;
+
+      for (const sourceCommit of sourceCommits) {
+        // Fork point should be older than or equal to the branch's oldest commit
+        if (sourceCommit.date.getTime() <= oldestCommit.date.getTime()) {
+          forkPoint = sourceCommit;
+          break; // sourceCommits is sorted newest → oldest
+        }
+      }
+
+      // If found a fork point, create connection
+      if (forkPoint && commitMap.has(forkPoint.sha)) {
+        virtualParents.set(oldestCommit.sha, forkPoint.sha);
       }
     });
 
