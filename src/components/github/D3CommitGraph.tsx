@@ -215,7 +215,7 @@ export default function D3CommitGraph({
 
       const node: GraphNode = {
         commit,
-        x: column * 50 + 30,  // 50px between columns, 30px offset
+        x: column * 100 + 30,  // 100px between columns, 30px offset
         y: index * 60 + 40,    // 60px between rows, 40px offset
         column,
         color,
@@ -409,7 +409,7 @@ export default function D3CommitGraph({
             .attr('stroke', node.color)
             .attr('stroke-width', 2)
             .attr('fill', 'none')
-            .attr('opacity', 0.6);
+            .attr('opacity', 0.35);
         }
       });
     });
