@@ -1,7 +1,7 @@
 import { ReactNode, useState, useRef, useEffect } from 'react';
 
 interface TooltipProps {
-  content: string;
+  content: ReactNode;
   children: ReactNode;
   className?: string;
   disabled?: boolean;

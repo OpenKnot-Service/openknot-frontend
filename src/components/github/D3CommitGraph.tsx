@@ -1,5 +1,4 @@
 import { useEffect, useRef, useMemo, useState } from 'react';
-import * as d3 from 'd3';
 import { GitHubCommit, GitHubBranch } from '../../types';
 import BranchSidebar from './graph/BranchSidebar';
 import VerticalCommitGraph from './graph/VerticalCommitGraph';

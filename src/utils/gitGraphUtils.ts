@@ -106,7 +106,7 @@ export function createAngularPath(
 export function createAdvancedAngularPath(
   from: Point,
   to: Point,
-  isMerge: boolean = false,
+  _isMerge: boolean = false,
   cornerRadius: number = 8
 ): string {
   const dx = to.x - from.x;
