@@ -54,7 +54,7 @@ export function createStraightPath(from: Point, to: Point): string {
 
 /**
  * GitKraken 스타일 각진 경로 (꺾이는 부분만 round)
- * stroke-linejoin="round"와 함께 사용
+ * Quadratic Bezier 곡선으로 코너 둥글기 구현
  *
  * @param from - 시작점 (자식 커밋)
  * @param to - 끝점 (부모 커밋)
@@ -74,25 +74,40 @@ export function createAngularPath(
     return `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
   }
 
-  // GitKraken 스타일: 직각으로 꺾임
-  // 1. 시작점에서 수직으로 midY까지
-  // 2. 수평으로 to.x까지
-  // 3. 수직으로 to.y까지
-  return `M ${from.x} ${from.y} L ${from.x} ${midY} L ${to.x} ${midY} L ${to.x} ${to.y}`;
+  // 코너 반경이 경로보다 크면 조정
+  const r = Math.min(cornerRadius, Math.abs(dy) * 0.25, Math.abs(dx) * 0.5);
+
+  // GitKraken 스타일: 직각으로 꺾이되 코너는 둥글게
+  // 1. 시작점에서 첫 번째 코너 직전까지 수직
+  // 2. Q 명령어로 둥근 코너 (수직→수평 전환)
+  // 3. 두 번째 코너 직전까지 수평
+  // 4. Q 명령어로 둥근 코너 (수평→수직 전환)
+  // 5. 끝점까지 수직
+
+  const direction = dx > 0 ? 1 : -1;
+
+  return `M ${from.x} ${from.y}
+          L ${from.x} ${midY - r}
+          Q ${from.x} ${midY} ${from.x + direction * r} ${midY}
+          L ${to.x - direction * r} ${midY}
+          Q ${to.x} ${midY} ${to.x} ${midY + r}
+          L ${to.x} ${to.y}`;
 }
 
 /**
  * 고급 각진 경로 (병합 시 2단계 꺾임)
- * 병합 커밋일 때 더 자연스러운 경로
+ * Quadratic Bezier 곡선으로 코너 둥글기 구현
  *
  * @param from - 시작점
  * @param to - 끝점
  * @param isMerge - 병합 커밋 여부
+ * @param cornerRadius - 코너 둥글기 (기본값 8)
  */
 export function createAdvancedAngularPath(
   from: Point,
   to: Point,
-  isMerge: boolean = false
+  isMerge: boolean = false,
+  cornerRadius: number = 8
 ): string {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -102,22 +117,30 @@ export function createAdvancedAngularPath(
     return `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
   }
 
+  // 코너 반경 조정
+  const r = Math.min(cornerRadius, Math.abs(dy) * 0.15, Math.abs(dx) * 0.5);
+  const direction = dx > 0 ? 1 : -1;
+
   if (isMerge) {
     // 병합: 3단계 꺾임 (더 부드러운 병합 느낌)
     const y1 = from.y + dy * 0.3;
     const y2 = from.y + dy * 0.7;
 
     return `M ${from.x} ${from.y}
-            L ${from.x} ${y1}
-            L ${to.x} ${y2}
+            L ${from.x} ${y1 - r}
+            Q ${from.x} ${y1} ${from.x + direction * r} ${y1}
+            L ${to.x - direction * r} ${y2}
+            Q ${to.x} ${y2} ${to.x} ${y2 + r}
             L ${to.x} ${to.y}`;
   } else {
     // 일반 분기: 2단계 꺾임 (중간 지점)
     const midY = from.y + dy * 0.5;
 
     return `M ${from.x} ${from.y}
-            L ${from.x} ${midY}
-            L ${to.x} ${midY}
+            L ${from.x} ${midY - r}
+            Q ${from.x} ${midY} ${from.x + direction * r} ${midY}
+            L ${to.x - direction * r} ${midY}
+            Q ${to.x} ${midY} ${to.x} ${midY + r}
             L ${to.x} ${to.y}`;
   }
 }
