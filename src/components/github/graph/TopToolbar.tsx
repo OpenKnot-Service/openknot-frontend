@@ -1,22 +1,18 @@
-import { GitBranch, GitPullRequest, Upload, Download, RefreshCw, Folder } from 'lucide-react';
+import { GitBranch, Folder, RefreshCw } from 'lucide-react';
 import { gitKrakenTheme } from '../../../styles/gitkraken-theme';
 
 interface TopToolbarProps {
   currentRepo?: string;
   currentBranch?: string;
-  onPull?: () => void;
-  onPush?: () => void;
-  onFetch?: () => void;
   onRepoChange?: () => void;
+  onRefresh?: () => void;
 }
 
 export default function TopToolbar({
   currentRepo = 'OpenKnot Frontend',
   currentBranch = 'main',
-  onPull,
-  onPush,
-  onFetch,
   onRepoChange,
+  onRefresh,
 }: TopToolbarProps) {
   return (
     <div
@@ -54,61 +50,19 @@ export default function TopToolbar({
         </div>
       </div>
 
-      {/* Right: Action Buttons */}
+      {/* Right: Refresh Button */}
       <div className="flex items-center gap-2">
-        {/* Pull */}
         <button
-          onClick={onPull}
+          onClick={onRefresh}
           className="flex items-center gap-2 px-3 py-1.5 rounded transition-all hover:scale-105"
-          style={{
-            backgroundColor: gitKrakenTheme.accent.blue,
-            color: gitKrakenTheme.background.primary,
-          }}
-          title="Pull"
-        >
-          <Download size={16} />
-          <span className="text-sm font-medium">Pull</span>
-        </button>
-
-        {/* Push */}
-        <button
-          onClick={onPush}
-          className="flex items-center gap-2 px-3 py-1.5 rounded transition-all hover:scale-105"
-          style={{
-            backgroundColor: gitKrakenTheme.accent.green,
-            color: gitKrakenTheme.background.primary,
-          }}
-          title="Push"
-        >
-          <Upload size={16} />
-          <span className="text-sm font-medium">Push</span>
-        </button>
-
-        {/* Fetch */}
-        <button
-          onClick={onFetch}
-          className="flex items-center gap-1 px-3 py-1.5 rounded transition-colors"
           style={{
             backgroundColor: gitKrakenTheme.background.hover,
             color: gitKrakenTheme.text.primary,
           }}
-          title="Fetch"
+          title="새로고침"
         >
           <RefreshCw size={16} />
-          <span className="text-sm">Fetch</span>
-        </button>
-
-        {/* Pull Request */}
-        <button
-          className="flex items-center gap-1 px-3 py-1.5 rounded transition-colors"
-          style={{
-            backgroundColor: gitKrakenTheme.background.hover,
-            color: gitKrakenTheme.text.primary,
-          }}
-          title="Pull Request"
-        >
-          <GitPullRequest size={16} />
-          <span className="text-sm">PR</span>
+          <span className="text-sm">Refresh</span>
         </button>
       </div>
     </div>

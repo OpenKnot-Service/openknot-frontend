@@ -330,10 +330,8 @@ export default function D3CommitGraph({
       <TopToolbar
         currentRepo="OpenKnot Frontend"
         currentBranch={currentBranch}
-        onPull={() => console.log('Pull clicked')}
-        onPush={() => console.log('Push clicked')}
-        onFetch={() => console.log('Fetch clicked')}
         onRepoChange={() => console.log('Repo change clicked')}
+        onRefresh={() => console.log('Refresh clicked')}
       />
 
       {/* Main Content Area */}
