@@ -6,7 +6,6 @@ import BranchSidebar from './graph/BranchSidebar';
 import CommitInfoPanel from './graph/CommitInfoPanel';
 import VerticalCommitGraph from './graph/VerticalCommitGraph';
 import TopToolbar from './graph/TopToolbar';
-import RepositoryList from './graph/RepositoryList';
 import { gitKrakenTheme } from '../../styles/gitkraken-theme';
 
 interface D3CommitGraphProps {
@@ -312,13 +311,6 @@ export default function D3CommitGraph({
   const svgWidth = Math.max(800, graphData.branchList.length * BRANCH_SPACING + 200);
   const svgHeight = Math.max(600, graphData.nodes.length * COMMIT_SPACING + 100);
 
-  // Dummy repository data (GitKraken style)
-  const dummyRepositories = [
-    { id: '1', name: 'OpenKnot Frontend', path: '/Users/mac/openknot/frontend', isActive: true },
-    { id: '2', name: 'OpenKnot Backend', path: '/Users/mac/openknot/backend', isActive: false },
-    { id: '3', name: 'OpenKnot Docs', path: '/Users/mac/openknot/docs', isActive: false },
-  ];
-
   const currentBranch = branches.find((b) => b.isDefault)?.name || 'main';
 
   return (
@@ -336,7 +328,7 @@ export default function D3CommitGraph({
 
       {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar: Repositories + Branches */}
+        {/* Left Sidebar: Branches */}
         <div
           className="w-64 shrink-0 flex flex-col border-r overflow-hidden"
           style={{
@@ -344,13 +336,6 @@ export default function D3CommitGraph({
             borderColor: gitKrakenTheme.border.primary,
           }}
         >
-          {/* Repository List */}
-          <RepositoryList
-            repositories={dummyRepositories}
-            currentRepoId="1"
-            onRepoSelect={(id) => console.log('Repo selected:', id)}
-          />
-
           {/* Branch List */}
           <div className="flex-1 overflow-hidden">
             <BranchSidebar
