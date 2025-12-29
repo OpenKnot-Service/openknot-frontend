@@ -181,15 +181,27 @@ export default function VerticalCommitGraph({
       .style('transition', `opacity ${TRANSITION_DURATION}ms ease`);
 
     /**
-     * 커밋 행 배경 (전체 너비)
+     * 커밋 행 배경 (전체 너비) - 맨 뒤에 렌더링
      */
     const rowBgGroup = g.append('g').attr('class', 'commit-row-backgrounds');
 
+    /**
+     * 커밋 노드 그리기
+     * hover 시 관련 브랜치 라인 강조
+     */
+    const nodeGroup = g.append('g').attr('class', 'commit-nodes');
+
+    /**
+     * 커밋 텍스트 그룹 - 맨 앞에 렌더링 (z-index 최상위)
+     */
+    const textGroup = g.append('g').attr('class', 'commit-texts');
+
+    // 배경 먼저 그리기
     nodes.forEach((node, index) => {
       const isSelected = node.commit.sha === selectedSha;
 
       // 전체 너비 배경
-      const rowBg = rowBgGroup
+      rowBgGroup
         .append('rect')
         .attr('x', 0)
         .attr('y', node.y - 14)
@@ -216,12 +228,6 @@ export default function VerticalCommitGraph({
           }
         });
     });
-
-    /**
-     * 커밋 노드 그리기
-     * hover 시 관련 브랜치 라인 강조
-     */
-    const nodeGroup = g.append('g').attr('class', 'commit-nodes');
 
     nodes.forEach((node, index) => {
       const group = nodeGroup
@@ -293,9 +299,11 @@ export default function VerticalCommitGraph({
           });
         });
 
-      // 커밋 정보 텍스트 (전체 너비 기준 오른쪽 정렬)
-      const textGroup = g.append('g').attr('transform', `translate(0, ${node.y})`);
+      // 커밋 정보 텍스트는 별도 루프에서 처리 (맨 위에 렌더링)
+    });
 
+    // 텍스트를 마지막에 그려서 맨 위에 표시
+    nodes.forEach((node, index) => {
       // 텍스트 내용
       const messageText = node.commit.message.length > 80
         ? node.commit.message.substring(0, 80) + '...'
@@ -306,7 +314,7 @@ export default function VerticalCommitGraph({
       textGroup
         .append('text')
         .attr('x', width - 16)
-        .attr('y', 0)
+        .attr('y', node.y)
         .attr('text-anchor', 'end')
         .attr('dominant-baseline', 'middle')
         .attr('class', 'commit-message')
@@ -314,18 +322,20 @@ export default function VerticalCommitGraph({
         .style('font-size', '13px')
         .style('font-weight', '500')
         .style('user-select', 'none')
+        .style('pointer-events', 'none')
         .text(messageText);
 
       // 작성자 + SHA (오른쪽 정렬)
       textGroup
         .append('text')
         .attr('x', width - 16)
-        .attr('y', 14)
+        .attr('y', node.y + 14)
         .attr('text-anchor', 'end')
         .attr('class', 'commit-meta')
         .style('fill', isDark ? '#9ca3af' : '#6b7280')
         .style('font-size', '11px')
         .style('user-select', 'none')
+        .style('pointer-events', 'none')
         .text(metaText);
     });
   }, [
