@@ -3440,7 +3440,9 @@ const productionBranches: GitHubBranch[] = [
 
 // Production Commits (25+ commits across all repos)
 const productionCommits: GitHubCommit[] = [
-  // Frontend commits (most recent)
+  // ========== Main Branch (시간 역순: 최신 → 오래된 순) ==========
+
+  // #1 - 가장 최근 (2시간 전)
   {
     sha: 'a9f2e1c',
     message: 'feat: 프로젝트 대시보드 성능 최적화 (useMemo 적용)',
@@ -3453,8 +3455,8 @@ const productionCommits: GitHubCommit[] = [
       name: 'Charlie Lee',
       email: 'charlie@example.com',
     },
-    date: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    parents: ['e7b4c2d'],
+    date: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
+    parents: ['b8d3c4f'], // Redis 최적화 이후
     branch: ['main'],
     stats: { additions: 87, deletions: 43, total: 130 },
     files: [
@@ -3462,46 +3464,8 @@ const productionCommits: GitHubCommit[] = [
       { filename:'src/components/ProjectCard.tsx', additions: 45, deletions: 25, changes: 70, status: 'modified' },
     ],
   },
-  {
-    sha: 'e7b4c2d',
-    message: 'fix: 알림 센터 스크롤 버그 수정',
-    author: {
-      name: 'Charlie Lee',
-      email: 'charlie@example.com',
-      avatarUrl: 'https://i.pravatar.cc/150?img=3',
-    },
-    committer: {
-      name: 'Charlie Lee',
-      email: 'charlie@example.com',
-    },
-    date: new Date(Date.now() - 8 * 60 * 60 * 1000),
-    parents: ['c3a8f9e'],
-    branch: ['main'],
-    stats: { additions: 12, deletions: 5, total: 17 },
-    files: [{ filename: 'src/components/NotificationCenter.tsx', additions: 12, deletions: 5, changes: 17, status: 'modified' }],
-  },
-  {
-    sha: 'c3a8f9e',
-    message: 'feat: GitHub 파일 트리 뷰어 구현',
-    author: {
-      name: 'Charlie Lee',
-      email: 'charlie@example.com',
-      avatarUrl: 'https://i.pravatar.cc/150?img=3',
-    },
-    committer: {
-      name: 'Charlie Lee',
-      email: 'charlie@example.com',
-    },
-    date: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    parents: [],
-    branch: ['main'],
-    stats: { additions: 456, deletions: 23, total: 479 },
-    files: [
-      { filename:'src/components/github/FileTreeViewer.tsx', additions: 320, deletions: 0, changes: 320, status: 'added' },
-      { filename:'src/components/github/FileContent.tsx', additions: 136, deletions: 23, changes: 159, status: 'modified' },
-    ],
-  },
-  // Backend commits
+
+  // #2 - 4시간 전
   {
     sha: 'b8d3c4f',
     message: 'fix: Redis 연결 풀 설정 최적화',
@@ -3514,12 +3478,198 @@ const productionCommits: GitHubCommit[] = [
       name: 'Eve Jung',
       email: 'eve@example.com',
     },
-    date: new Date(Date.now() - 4 * 60 * 60 * 1000),
-    parents: [],
+    date: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4시간 전
+    parents: ['e7b4c2d'], // 알림 버그 수정 이후
     branch: ['main'],
     stats: { additions: 15, deletions: 8, total: 23 },
     files: [{ filename: 'src/main/kotlin/config/RedisConfig.kt', additions: 15, deletions: 8, changes: 23, status: 'modified' }],
   },
+
+  // #3 - Hotfix merge (6시간 전)
+  {
+    sha: 'c7e5a2b',
+    message: 'Merge branch \'hotfix/android-push-notification\' into main',
+    author: {
+      name: 'Yoon Jiyoung',
+      email: 'yoon@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=7',
+    },
+    committer: {
+      name: 'Yoon Jiyoung',
+      email: 'yoon@example.com',
+    },
+    date: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6시간 전
+    parents: ['e7b4c2d', 'h3x9a1f'], // Merge commit: main + hotfix
+    branch: ['main'],
+    stats: { additions: 56, deletions: 32, total: 88 },
+    files: [
+      { filename:'src/services/pushNotifications.ts', additions: 45, deletions: 28, changes: 73, status: 'modified' },
+      { filename:'android/app/src/main/AndroidManifest.xml', additions: 11, deletions: 4, changes: 15, status: 'modified' },
+    ],
+  },
+
+  // #4 - 8시간 전
+  {
+    sha: 'e7b4c2d',
+    message: 'fix: 알림 센터 스크롤 버그 수정',
+    author: {
+      name: 'Charlie Lee',
+      email: 'charlie@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=3',
+    },
+    committer: {
+      name: 'Charlie Lee',
+      email: 'charlie@example.com',
+    },
+    date: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8시간 전
+    parents: ['c3a8f9e'], // 파일 트리 뷰어 이후
+    branch: ['main'],
+    stats: { additions: 12, deletions: 5, total: 17 },
+    files: [{ filename: 'src/components/NotificationCenter.tsx', additions: 12, deletions: 5, changes: 17, status: 'modified' }],
+  },
+
+  // #5 - 1일 전
+  {
+    sha: 'c3a8f9e',
+    message: 'feat: GitHub 파일 트리 뷰어 구현',
+    author: {
+      name: 'Charlie Lee',
+      email: 'charlie@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=3',
+    },
+    committer: {
+      name: 'Charlie Lee',
+      email: 'charlie@example.com',
+    },
+    date: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1일 전
+    parents: ['d9a1f8e'], // K8s 마이그레이션 이후
+    branch: ['main'],
+    stats: { additions: 456, deletions: 23, total: 479 },
+    files: [
+      { filename:'src/components/github/FileTreeViewer.tsx', additions: 320, deletions: 0, changes: 320, status: 'added' },
+      { filename:'src/components/github/FileContent.tsx', additions: 136, deletions: 23, changes: 159, status: 'modified' },
+    ],
+  },
+
+  // #6 - K8s merge (1일 전, 조금 더 오래)
+  {
+    sha: 'd9a1f8e',
+    message: 'Merge branch \'upgrade/k8s-1.28\' into main',
+    author: {
+      name: 'Kang Minsu',
+      email: 'kang@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=6',
+    },
+    committer: {
+      name: 'Kang Minsu',
+      email: 'kang@example.com',
+    },
+    date: new Date(Date.now() - 28 * 60 * 60 * 1000), // 28시간 전
+    parents: ['m8b7c2a', 'k8s4e1d'], // Merge commit: main + k8s
+    branch: ['main'],
+    stats: { additions: 145, deletions: 98, total: 243 },
+    files: [
+      { filename:'terraform/k8s-cluster.tf', additions: 87, deletions: 65, changes: 152, status: 'modified' },
+      { filename:'helm/values.yaml', additions: 58, deletions: 33, changes: 91, status: 'modified' },
+    ],
+  },
+
+  // #7 - 3일 전 (Redis merge)
+  {
+    sha: 'm8b7c2a',
+    message: 'Merge branch \'feature/redis-cache\' into main',
+    author: {
+      name: 'Eve Jung',
+      email: 'eve@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=5',
+    },
+    committer: {
+      name: 'Eve Jung',
+      email: 'eve@example.com',
+    },
+    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3일 전
+    parents: ['m7a3f1b', 'd4e1c7a'], // Merge commit: main + redis
+    branch: ['main'],
+    stats: { additions: 324, deletions: 67, total: 391 },
+    files: [
+      { filename:'src/main/kotlin/service/CacheService.kt', additions: 185, deletions: 0, changes: 185, status: 'added' },
+      { filename:'src/main/kotlin/config/RedisConfig.kt', additions: 95, deletions: 45, changes: 140, status: 'modified' },
+      { filename:'src/main/kotlin/service/ProjectService.kt', additions: 44, deletions: 22, changes: 66, status: 'modified' },
+    ],
+  },
+
+  // #8 - 5일 전 (main 계속)
+  {
+    sha: 'm7a3f1b',
+    message: 'docs: API 문서 업데이트',
+    author: {
+      name: 'Alice Kim',
+      email: 'alice@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=1',
+    },
+    committer: {
+      name: 'Alice Kim',
+      email: 'alice@example.com',
+    },
+    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5일 전
+    parents: ['m6d8e3c'], // 이전 main 커밋
+    branch: ['main'],
+    stats: { additions: 78, deletions: 12, total: 90 },
+    files: [
+      { filename:'docs/API.md', additions: 78, deletions: 12, changes: 90, status: 'modified' },
+    ],
+  },
+
+  // #9 - 6일 전 (Offline mode merge)
+  {
+    sha: 'm6d8e3c',
+    message: 'Merge branch \'feature/offline-mode\' into main',
+    author: {
+      name: 'Yoon Jiyoung',
+      email: 'yoon@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=7',
+    },
+    committer: {
+      name: 'Yoon Jiyoung',
+      email: 'yoon@example.com',
+    },
+    date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6일 전
+    parents: ['m5c2a9e', 'f2a9c1b'], // Merge commit
+    branch: ['main'],
+    stats: { additions: 567, deletions: 89, total: 656 },
+    files: [
+      { filename:'src/services/offlineQueue.ts', additions: 234, deletions: 0, changes: 234, status: 'added' },
+      { filename:'src/services/syncManager.ts', additions: 198, deletions: 0, changes: 198, status: 'added' },
+      { filename:'src/contexts/OfflineContext.tsx', additions: 135, deletions: 89, changes: 224, status: 'modified' },
+    ],
+  },
+
+  // #10 - 7일 전 (main 초기)
+  {
+    sha: 'm5c2a9e',
+    message: 'chore: 프로젝트 초기 설정',
+    author: {
+      name: 'Alice Kim',
+      email: 'alice@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=1',
+    },
+    committer: {
+      name: 'Alice Kim',
+      email: 'alice@example.com',
+    },
+    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7일 전
+    parents: [], // 최초 커밋
+    branch: ['main'],
+    stats: { additions: 1234, deletions: 0, total: 1234 },
+    files: [
+      { filename:'package.json', additions: 45, deletions: 0, changes: 45, status: 'added' },
+      { filename:'README.md', additions: 89, deletions: 0, changes: 89, status: 'added' },
+    ],
+  },
+
+  // ========== Feature Branch: feature/redis-cache ==========
+
+  // #11 - Redis 브랜치 마지막 커밋 (3.5일 전)
   {
     sha: 'd4e1c7a',
     message: 'feat: Redis 캐싱 레이어 추가',
@@ -3532,19 +3682,133 @@ const productionCommits: GitHubCommit[] = [
       name: 'Eve Jung',
       email: 'eve@example.com',
     },
-    date: new Date(Date.now() - 72 * 60 * 60 * 1000),
-    parents: [],
+    date: new Date(Date.now() - 3.5 * 24 * 60 * 60 * 1000), // 3.5일 전 (merge 직전)
+    parents: ['r2e4a7c'], // Redis 브랜치 이전 커밋
     branch: ['feature/redis-cache'],
-    stats: { additions: 324, deletions: 67, total: 391 },
+    stats: { additions: 185, deletions: 45, total: 230 },
     files: [
       { filename:'src/main/kotlin/service/CacheService.kt', additions: 185, deletions: 0, changes: 185, status: 'added' },
-      { filename:'src/main/kotlin/config/RedisConfig.kt', additions: 95, deletions: 45, changes: 140, status: 'modified' },
-      { filename:'src/main/kotlin/service/ProjectService.kt', additions: 44, deletions: 22, changes: 66, status: 'modified' },
+      { filename:'src/main/kotlin/config/RedisConfig.kt', additions: 0, deletions: 45, changes: 45, status: 'modified' },
     ],
   },
-  // Mobile commits
+
+  // #12 - Redis 브랜치 중간 커밋
   {
-    sha: 'c7e5a2b',
+    sha: 'r2e4a7c',
+    message: 'feat: Redis 설정 추가',
+    author: {
+      name: 'Eve Jung',
+      email: 'eve@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=5',
+    },
+    committer: {
+      name: 'Eve Jung',
+      email: 'eve@example.com',
+    },
+    date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4일 전
+    parents: ['r1a8b2f'], // Redis 브랜치 첫 커밋
+    branch: ['feature/redis-cache'],
+    stats: { additions: 95, deletions: 0, total: 95 },
+    files: [
+      { filename:'src/main/kotlin/config/RedisConfig.kt', additions: 95, deletions: 0, changes: 95, status: 'added' },
+    ],
+  },
+
+  // #13 - Redis 브랜치 첫 커밋 (main에서 분기)
+  {
+    sha: 'r1a8b2f',
+    message: 'feat: Redis 의존성 추가',
+    author: {
+      name: 'Eve Jung',
+      email: 'eve@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=5',
+    },
+    committer: {
+      name: 'Eve Jung',
+      email: 'eve@example.com',
+    },
+    date: new Date(Date.now() - 4.5 * 24 * 60 * 60 * 1000), // 4.5일 전
+    parents: ['m7a3f1b'], // main에서 분기
+    branch: ['feature/redis-cache'],
+    stats: { additions: 44, deletions: 22, total: 66 },
+    files: [
+      { filename:'build.gradle.kts', additions: 44, deletions: 22, changes: 66, status: 'modified' },
+    ],
+  },
+
+  // ========== Feature Branch: feature/offline-mode ==========
+
+  // #14 - Offline 브랜치 마지막 커밋
+  {
+    sha: 'f2a9c1b',
+    message: 'feat: 오프라인 모드 구현 완료',
+    author: {
+      name: 'Yoon Jiyoung',
+      email: 'yoon@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=7',
+    },
+    committer: {
+      name: 'Yoon Jiyoung',
+      email: 'yoon@example.com',
+    },
+    date: new Date(Date.now() - 6.2 * 24 * 60 * 60 * 1000), // 6.2일 전
+    parents: ['o2c7e1a'], // Offline 브랜치 이전
+    branch: ['feature/offline-mode'],
+    stats: { additions: 135, deletions: 89, total: 224 },
+    files: [
+      { filename:'src/contexts/OfflineContext.tsx', additions: 135, deletions: 89, changes: 224, status: 'modified' },
+    ],
+  },
+
+  // #15 - Offline 브랜치 중간 커밋
+  {
+    sha: 'o2c7e1a',
+    message: 'feat: 동기화 매니저 구현',
+    author: {
+      name: 'Yoon Jiyoung',
+      email: 'yoon@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=7',
+    },
+    committer: {
+      name: 'Yoon Jiyoung',
+      email: 'yoon@example.com',
+    },
+    date: new Date(Date.now() - 6.5 * 24 * 60 * 60 * 1000), // 6.5일 전
+    parents: ['o1b3f8d'], // Offline 첫 커밋
+    branch: ['feature/offline-mode'],
+    stats: { additions: 198, deletions: 0, total: 198 },
+    files: [
+      { filename:'src/services/syncManager.ts', additions: 198, deletions: 0, changes: 198, status: 'added' },
+    ],
+  },
+
+  // #16 - Offline 브랜치 첫 커밋
+  {
+    sha: 'o1b3f8d',
+    message: 'feat: 오프라인 큐 구현',
+    author: {
+      name: 'Yoon Jiyoung',
+      email: 'yoon@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=7',
+    },
+    committer: {
+      name: 'Yoon Jiyoung',
+      email: 'yoon@example.com',
+    },
+    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7일 전
+    parents: ['m5c2a9e'], // main에서 분기
+    branch: ['feature/offline-mode'],
+    stats: { additions: 234, deletions: 0, total: 234 },
+    files: [
+      { filename:'src/services/offlineQueue.ts', additions: 234, deletions: 0, changes: 234, status: 'added' },
+    ],
+  },
+
+  // ========== Hotfix Branch: hotfix/android-push-notification ==========
+
+  // #17 - Hotfix 브랜치 마지막 커밋
+  {
+    sha: 'h3x9a1f',
     message: 'fix: Android 푸시 알림 버그 수정',
     author: {
       name: 'Yoon Jiyoung',
@@ -3555,18 +3819,19 @@ const productionCommits: GitHubCommit[] = [
       name: 'Yoon Jiyoung',
       email: 'yoon@example.com',
     },
-    date: new Date(Date.now() - 6 * 60 * 60 * 1000),
-    parents: [],
+    date: new Date(Date.now() - 6.5 * 60 * 60 * 1000), // 6.5시간 전
+    parents: ['h2a7c4e'], // Hotfix 이전
     branch: ['hotfix/android-push-notification'],
-    stats: { additions: 56, deletions: 32, total: 88 },
+    stats: { additions: 45, deletions: 28, total: 73 },
     files: [
       { filename:'src/services/pushNotifications.ts', additions: 45, deletions: 28, changes: 73, status: 'modified' },
-      { filename:'android/app/src/main/AndroidManifest.xml', additions: 11, deletions: 4, changes: 15, status: 'modified' },
     ],
   },
+
+  // #18 - Hotfix 브랜치 첫 커밋
   {
-    sha: 'f2a9c1b',
-    message: 'feat: 오프라인 모드 구현 (AsyncStorage)',
+    sha: 'h2a7c4e',
+    message: 'fix: FCM 설정 수정',
     author: {
       name: 'Yoon Jiyoung',
       email: 'yoon@example.com',
@@ -3576,20 +3841,21 @@ const productionCommits: GitHubCommit[] = [
       name: 'Yoon Jiyoung',
       email: 'yoon@example.com',
     },
-    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-    parents: [],
-    branch: ['feature/offline-mode'],
-    stats: { additions: 567, deletions: 89, total: 656 },
+    date: new Date(Date.now() - 7 * 60 * 60 * 1000), // 7시간 전
+    parents: ['e7b4c2d'], // main에서 분기 (알림 버그 수정 이후)
+    branch: ['hotfix/android-push-notification'],
+    stats: { additions: 11, deletions: 4, total: 15 },
     files: [
-      { filename:'src/services/offlineQueue.ts', additions: 234, deletions: 0, changes: 234, status: 'added' },
-      { filename:'src/services/syncManager.ts', additions: 198, deletions: 0, changes: 198, status: 'added' },
-      { filename:'src/contexts/OfflineContext.tsx', additions: 135, deletions: 89, changes: 224, status: 'modified' },
+      { filename:'android/app/src/main/AndroidManifest.xml', additions: 11, deletions: 4, changes: 15, status: 'modified' },
     ],
   },
-  // Infrastructure commits
+
+  // ========== Feature Branch: upgrade/k8s-1.28 ==========
+
+  // #19 - K8s 브랜치 마지막 커밋
   {
-    sha: 'd9a1f8e',
-    message: 'chore: Kubernetes 1.28 마이그레이션 준비',
+    sha: 'k8s4e1d',
+    message: 'chore: Kubernetes 1.28 마이그레이션 완료',
     author: {
       name: 'Kang Minsu',
       email: 'kang@example.com',
@@ -3599,13 +3865,34 @@ const productionCommits: GitHubCommit[] = [
       name: 'Kang Minsu',
       email: 'kang@example.com',
     },
-    date: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    parents: [],
+    date: new Date(Date.now() - 1.2 * 24 * 60 * 60 * 1000), // 1.2일 전
+    parents: ['k8s3b2a'], // K8s 이전
     branch: ['upgrade/k8s-1.28'],
-    stats: { additions: 145, deletions: 98, total: 243 },
+    stats: { additions: 58, deletions: 33, total: 91 },
+    files: [
+      { filename:'helm/values.yaml', additions: 58, deletions: 33, changes: 91, status: 'modified' },
+    ],
+  },
+
+  // #20 - K8s 브랜치 첫 커밋
+  {
+    sha: 'k8s3b2a',
+    message: 'chore: Terraform 설정 업데이트',
+    author: {
+      name: 'Kang Minsu',
+      email: 'kang@example.com',
+      avatarUrl: 'https://i.pravatar.cc/150?img=6',
+    },
+    committer: {
+      name: 'Kang Minsu',
+      email: 'kang@example.com',
+    },
+    date: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000), // 1.5일 전
+    parents: ['c3a8f9e'], // main에서 분기 (파일 트리 뷰어 직후)
+    branch: ['upgrade/k8s-1.28'],
+    stats: { additions: 87, deletions: 65, total: 152 },
     files: [
       { filename:'terraform/k8s-cluster.tf', additions: 87, deletions: 65, changes: 152, status: 'modified' },
-      { filename:'helm/values.yaml', additions: 58, deletions: 33, changes: 91, status: 'modified' },
     ],
   },
 ];
