@@ -3888,7 +3888,7 @@ const productionCommits: GitHubCommit[] = [
       email: 'kang@example.com',
     },
     date: new Date(Date.now() - 0.5 * 24 * 60 * 60 * 1000), // 1.5일 전
-    parents: ['c3a8f9e'], // main에서 분기 (파일 트리 뷰어 직후)
+    parents: ['m8b7c2a'], // main에서 분기 (Redis 병합 이후)
     branch: ['upgrade/k8s-1.28'],
     stats: { additions: 87, deletions: 65, total: 152 },
     files: [
