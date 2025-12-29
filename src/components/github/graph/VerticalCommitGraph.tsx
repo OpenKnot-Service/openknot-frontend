@@ -63,6 +63,9 @@ export default function VerticalCommitGraph({
     // SVG 크기 설정
     svg.attr('width', width).attr('height', height);
 
+    // 컨테이너의 실제 너비 가져오기 (스크롤 가능한 영역)
+    const containerWidth = svgRef.current.parentElement?.clientWidth || width;
+
     // 메인 그룹 생성 (줌 없이)
     const g = svg.append('g');
 
@@ -200,12 +203,12 @@ export default function VerticalCommitGraph({
     nodes.forEach((node, index) => {
       const isSelected = node.commit.sha === selectedSha;
 
-      // 전체 너비 배경
+      // 전체 너비 배경 (컨테이너 너비에 맞춤)
       rowBgGroup
         .append('rect')
         .attr('x', 0)
         .attr('y', node.y - 14)
-        .attr('width', width)
+        .attr('width', containerWidth)
         .attr('height', 28)
         .attr('class', `commit-row-bg commit-row-${node.commit.sha}`)
         .style('fill', isSelected
@@ -315,7 +318,7 @@ export default function VerticalCommitGraph({
       // 커밋 정보 (오른쪽 정렬, 노드와 같은 높이)
       textGroup
         .append('text')
-        .attr('x', width - 60)
+        .attr('x', containerWidth - 60)
         .attr('y', node.y)
         .attr('text-anchor', 'end')
         .attr('dominant-baseline', 'middle')
