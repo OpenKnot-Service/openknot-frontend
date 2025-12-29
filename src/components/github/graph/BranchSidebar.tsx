@@ -1,5 +1,7 @@
-import { GitBranch, Code, Wrench, Flame, Bug, Tag, CheckCircle2 } from 'lucide-react';
+import { GitBranch, Code, Wrench, Flame, Bug, Tag, CheckCircle2, ChevronRight } from 'lucide-react';
 import { Tooltip } from '../../ui/Tooltip';
+import { gitKrakenTheme } from '../../../styles/gitkraken-theme';
+import { useState } from 'react';
 
 type BranchType = 'main' | 'develop' | 'feature' | 'hotfix' | 'bugfix' | 'release' | 'other';
 
@@ -56,66 +58,99 @@ export default function BranchSidebar({
   currentBranch,
   onBranchClick,
 }: BranchSidebarProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   return (
-    <div className="h-full overflow-y-auto py-2 bg-gray-50 dark:bg-gray-900/50 border-r border-gray-200 dark:border-gray-700">
-      <h3 className="px-3 mb-2 text-xs font-semibold text-gray-900 dark:text-white">
-        Branches
-      </h3>
-      <div className="space-y-1">
-        {branches.map((branch) => {
-          const Icon = getBranchIcon(branch.type);
-          const styles = getBranchStyles(branch.type);
-          const isSelected = branch.name === selectedBranch;
-          const isCurrent = branch.name === currentBranch;
+    <div
+      className="h-full overflow-y-auto"
+      style={{
+        backgroundColor: gitKrakenTheme.background.secondary,
+      }}
+    >
+      {/* Header */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="w-full flex items-center justify-between px-3 py-2 transition-colors hover:bg-opacity-80"
+        style={{
+          backgroundColor: gitKrakenTheme.background.tertiary,
+          color: gitKrakenTheme.text.secondary,
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <GitBranch size={14} />
+          <span className="text-xs font-semibold uppercase tracking-wide">
+            Branches
+          </span>
+        </div>
+        <ChevronRight
+          size={14}
+          className={`transition-transform ${isCollapsed ? '' : 'rotate-90'}`}
+        />
+      </button>
 
-          return (
-            <button
-              key={branch.name}
-              onClick={() => onBranchClick(branch.name)}
-              className={`
-                w-full flex items-center gap-2 px-3 py-1.5
-                transition-colors text-left
-                ${
-                  isSelected
-                    ? 'bg-blue-50 dark:bg-blue-900/20 border-l-2 border-blue-500'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 border-l-2 border-transparent'
-                }
-              `}
-            >
-              {/* Color indicator */}
-              <div
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ backgroundColor: branch.color }}
-              />
+      {/* Branch List */}
+      {!isCollapsed && (
+        <div className="py-1">
+          {branches.map((branch) => {
+            const Icon = getBranchIcon(branch.type);
+            const styles = getBranchStyles(branch.type);
+            const isSelected = branch.name === selectedBranch;
+            const isCurrent = branch.name === currentBranch;
 
-              {/* Branch icon */}
-              <Icon
-                size={styles.iconSize}
-                style={{ color: branch.color }}
-                className="shrink-0"
-              />
+            return (
+              <button
+                key={branch.name}
+                onClick={() => onBranchClick(branch.name)}
+                className={`
+                  w-full flex items-center gap-2 px-3 py-1.5
+                  transition-all text-left hover:scale-[1.02]
+                  ${isSelected ? 'border-l-2' : 'border-l-2 border-transparent'}
+                `}
+                style={{
+                  backgroundColor: isSelected
+                    ? gitKrakenTheme.background.active
+                    : 'transparent',
+                  borderColor: isSelected ? gitKrakenTheme.accent.blue : 'transparent',
+                  color: isSelected
+                    ? gitKrakenTheme.text.bright
+                    : gitKrakenTheme.text.primary,
+                }}
+              >
+                {/* Color indicator */}
+                <div
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{ backgroundColor: branch.color }}
+                />
 
-              {/* Branch name */}
-              <Tooltip content={branch.name}>
-                <span
-                  className="flex-1 truncate text-gray-900 dark:text-white"
-                  style={{
-                    fontSize: styles.fontSize,
-                    fontWeight: styles.fontWeight,
-                  }}
-                >
-                  {branch.name}
-                </span>
-              </Tooltip>
+                {/* Branch icon */}
+                <Icon
+                  size={styles.iconSize}
+                  style={{ color: branch.color }}
+                  className="shrink-0"
+                />
 
-              {/* Checkout indicator */}
-              {isCurrent && (
-                <CheckCircle2 size={14} className="text-green-500 shrink-0" />
-              )}
-            </button>
-          );
-        })}
-      </div>
+                {/* Branch name */}
+                <Tooltip content={branch.name}>
+                  <span
+                    className="flex-1 truncate text-gray-900 dark:text-white"
+                    style={{
+                      fontSize: styles.fontSize,
+                      fontWeight: styles.fontWeight,
+                    }}
+                  >
+                    {branch.name}
+                  </span>
+                </Tooltip>
+
+                {/* Checkout indicator */}
+                {isCurrent && (
+                  <CheckCircle2 size={14} className="text-green-500 shrink-0" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

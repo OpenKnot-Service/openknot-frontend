@@ -5,6 +5,9 @@ import { RotateCcw } from 'lucide-react';
 import BranchSidebar from './graph/BranchSidebar';
 import CommitInfoPanel from './graph/CommitInfoPanel';
 import VerticalCommitGraph from './graph/VerticalCommitGraph';
+import TopToolbar from './graph/TopToolbar';
+import RepositoryList from './graph/RepositoryList';
+import { gitKrakenTheme } from '../../styles/gitkraken-theme';
 
 interface D3CommitGraphProps {
   commits: GitHubCommit[];
@@ -309,66 +312,127 @@ export default function D3CommitGraph({
   const svgWidth = Math.max(800, graphData.branchList.length * BRANCH_SPACING + 200);
   const svgHeight = Math.max(600, graphData.nodes.length * COMMIT_SPACING + 100);
 
+  // Dummy repository data (GitKraken style)
+  const dummyRepositories = [
+    { id: '1', name: 'OpenKnot Frontend', path: '/Users/mac/openknot/frontend', isActive: true },
+    { id: '2', name: 'OpenKnot Backend', path: '/Users/mac/openknot/backend', isActive: false },
+    { id: '3', name: 'OpenKnot Docs', path: '/Users/mac/openknot/docs', isActive: false },
+  ];
+
+  const currentBranch = branches.find((b) => b.isDefault)?.name || 'main';
+
   return (
-    <div className="flex h-full gap-4">
-      {/* Left: Branch Sidebar */}
-      <div className="w-52 shrink-0">
-        <BranchSidebar
-          branches={graphData.branchList}
-          selectedBranch={filters?.branch}
-          currentBranch={branches.find((b) => b.isDefault)?.name}
-          onBranchClick={(branchName) => {
-            // TODO: Update filters to filter by branch
-            console.log('Branch clicked:', branchName);
-          }}
-        />
-      </div>
+    <div
+      className="flex flex-col h-full"
+      style={{ backgroundColor: gitKrakenTheme.background.primary }}
+    >
+      {/* Top Toolbar */}
+      <TopToolbar
+        currentRepo="OpenKnot Frontend"
+        currentBranch={currentBranch}
+        onPull={() => console.log('Pull clicked')}
+        onPush={() => console.log('Push clicked')}
+        onFetch={() => console.log('Fetch clicked')}
+        onRepoChange={() => console.log('Repo change clicked')}
+      />
 
-      {/* Center: Graph Container */}
-      <div className="flex-1 min-w-0 relative">
-        {/* Reset Zoom Button */}
-        <button
-          onClick={handleResetZoom}
-          className="absolute right-2 md:right-4 top-2 md:top-4 z-10 rounded-md bg-white p-1.5 md:p-2 shadow-md transition hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600"
-          title="줌 초기화"
-        >
-          <RotateCcw className="h-4 w-4 text-gray-700 dark:text-gray-300" />
-        </button>
-
-        {/* SVG Container */}
+      {/* Main Content Area */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar: Repositories + Branches */}
         <div
-          ref={containerRef}
-          className="overflow-hidden rounded-md border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
-          style={{ height: `${svgHeight}px` }}
+          className="w-64 shrink-0 flex flex-col border-r overflow-hidden"
+          style={{
+            backgroundColor: gitKrakenTheme.background.secondary,
+            borderColor: gitKrakenTheme.border.primary,
+          }}
         >
-          <VerticalCommitGraph
+          {/* Repository List */}
+          <RepositoryList
+            repositories={dummyRepositories}
+            currentRepoId="1"
+            onRepoSelect={(id) => console.log('Repo selected:', id)}
+          />
+
+          {/* Branch List */}
+          <div className="flex-1 overflow-hidden">
+            <BranchSidebar
+              branches={graphData.branchList}
+              selectedBranch={filters?.branch}
+              currentBranch={currentBranch}
+              onBranchClick={(branchName) => {
+                console.log('Branch clicked:', branchName);
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Center: Graph Container */}
+        <div className="flex-1 min-w-0 relative flex flex-col">
+          {/* Reset Zoom Button */}
+          <button
+            onClick={handleResetZoom}
+            className="absolute right-4 top-4 z-10 rounded-md p-2 shadow-lg transition-all hover:scale-110"
+            style={{
+              backgroundColor: gitKrakenTheme.background.tertiary,
+              color: gitKrakenTheme.text.primary,
+            }}
+            title="Reset Zoom"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+
+          {/* SVG Container */}
+          <div
+            ref={containerRef}
+            className="flex-1 overflow-hidden"
+            style={{
+              backgroundColor: gitKrakenTheme.background.primary,
+              height: `${svgHeight}px`,
+            }}
+          >
+            <VerticalCommitGraph
+              nodes={graphData.nodes}
+              commitMap={graphData.commitMap}
+              virtualParents={graphData.virtualParents}
+              width={svgWidth}
+              height={svgHeight}
+              isDark={isDark}
+              selectedSha={selectedCommitSha}
+              onCommitClick={onCommitClick}
+              transform={transform}
+              onTransformChange={setTransform}
+            />
+          </div>
+
+          {/* Instructions */}
+          <div
+            className="px-4 py-2 text-center text-xs border-t"
+            style={{
+              backgroundColor: gitKrakenTheme.background.tertiary,
+              color: gitKrakenTheme.text.secondary,
+              borderColor: gitKrakenTheme.border.primary,
+            }}
+          >
+            <span className="hidden sm:inline">Scroll to zoom • Drag to pan • </span>
+            Click commit for details
+          </div>
+        </div>
+
+        {/* Right: Commit Info Panel */}
+        <div
+          className="w-96 shrink-0 border-l"
+          style={{
+            backgroundColor: gitKrakenTheme.background.secondary,
+            borderColor: gitKrakenTheme.border.primary,
+          }}
+        >
+          <CommitInfoPanel
             nodes={graphData.nodes}
-            commitMap={graphData.commitMap}
-            virtualParents={graphData.virtualParents}
-            width={svgWidth}
-            height={svgHeight}
-            isDark={isDark}
-            selectedSha={selectedCommitSha}
             onCommitClick={onCommitClick}
-            transform={transform}
-            onTransformChange={setTransform}
+            selectedSha={selectedCommitSha}
+            commitSpacing={COMMIT_SPACING}
           />
         </div>
-
-        {/* Instructions */}
-        <div className="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">
-          <span className="hidden sm:inline">마우스 휠로 줌, 드래그로 이동, </span>커밋 클릭으로 상세 정보 보기
-        </div>
-      </div>
-
-      {/* Right: Commit Info Panel */}
-      <div className="w-96 shrink-0">
-        <CommitInfoPanel
-          nodes={graphData.nodes}
-          onCommitClick={onCommitClick}
-          selectedSha={selectedCommitSha}
-          commitSpacing={COMMIT_SPACING}
-        />
       </div>
     </div>
   );

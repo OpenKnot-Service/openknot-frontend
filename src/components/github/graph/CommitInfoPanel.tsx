@@ -1,7 +1,9 @@
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { Copy } from 'lucide-react';
+import { Copy, ChevronRight } from 'lucide-react';
 import { GitHubCommit } from '../../../types';
+import { gitKrakenTheme } from '../../../styles/gitkraken-theme';
+import { useState } from 'react';
 
 interface GraphNode {
   commit: GitHubCommit;
@@ -25,6 +27,8 @@ export default function CommitInfoPanel({
   selectedSha,
   commitSpacing,
 }: CommitInfoPanelProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   const handleCopySha = (sha: string, e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(sha);
@@ -32,71 +36,118 @@ export default function CommitInfoPanel({
   };
 
   return (
-    <div className="h-full overflow-y-auto py-2 bg-gray-50 dark:bg-gray-900/50 border-l border-gray-200 dark:border-gray-700">
-      <h3 className="px-3 mb-2 text-xs font-semibold text-gray-900 dark:text-white">
-        Commit History
-      </h3>
-      <div className="space-y-0">
-        {nodes.map((node) => {
-          const commit = node.commit;
-          const isSelected = commit.sha === selectedSha;
+    <div
+      className="h-full overflow-y-auto"
+      style={{ backgroundColor: gitKrakenTheme.background.secondary }}
+    >
+      {/* Header */}
+      <button
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="w-full flex items-center justify-between px-3 py-2 transition-colors hover:bg-opacity-80"
+        style={{
+          backgroundColor: gitKrakenTheme.background.tertiary,
+          color: gitKrakenTheme.text.secondary,
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide">
+            Commit History
+          </span>
+        </div>
+        <ChevronRight
+          size={14}
+          className={`transition-transform ${isCollapsed ? '' : 'rotate-90'}`}
+        />
+      </button>
 
-          return (
-            <div
-              key={commit.sha}
-              className={`
-                px-3 py-2 cursor-pointer
-                transition-colors border-l-2
-                ${
-                  isSelected
-                    ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
-                    : 'hover:bg-gray-50 dark:hover:bg-gray-800 border-transparent'
-                }
-              `}
-              onClick={() => onCommitClick?.(commit)}
-              style={{
-                minHeight: `${commitSpacing}px`,
-              }}
-            >
-              {/* Commit Message */}
-              <div className="text-xs font-medium text-gray-900 dark:text-white mb-1 line-clamp-2">
-                {commit.message}
-              </div>
+      {/* Commit List */}
+      {!isCollapsed && (
+        <div className="space-y-0">
+          {nodes.map((node) => {
+            const commit = node.commit;
+            const isSelected = commit.sha === selectedSha;
 
-              {/* SHA + Timestamp */}
-              <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400">
-                <div className="flex items-center gap-1">
-                  <code className="font-mono bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">
-                    {commit.sha.substring(0, 7)}
-                  </code>
-                  <button
-                    onClick={(e) => handleCopySha(commit.sha, e)}
-                    className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
-                    title="Copy SHA"
+            return (
+              <div
+                key={commit.sha}
+                className={`
+                  px-3 py-2 cursor-pointer
+                  transition-all hover:scale-[1.01] border-l-2
+                  ${isSelected ? 'border-l-2' : 'border-l-2 border-transparent'}
+                `}
+                onClick={() => onCommitClick?.(commit)}
+                style={{
+                  minHeight: `${commitSpacing}px`,
+                  backgroundColor: isSelected
+                    ? gitKrakenTheme.background.active
+                    : 'transparent',
+                  borderColor: isSelected
+                    ? gitKrakenTheme.accent.blue
+                    : 'transparent',
+                }}
+              >
+                {/* Commit Message */}
+                <div
+                  className="text-xs font-medium mb-1 line-clamp-2"
+                  style={{
+                    color: isSelected
+                      ? gitKrakenTheme.text.bright
+                      : gitKrakenTheme.text.primary,
+                  }}
+                >
+                  {commit.message}
+                </div>
+
+                {/* SHA + Timestamp */}
+                <div
+                  className="flex items-center gap-2 text-[11px]"
+                  style={{ color: gitKrakenTheme.text.secondary }}
+                >
+                  <div className="flex items-center gap-1">
+                    <code
+                      className="font-mono px-1.5 py-0.5 rounded"
+                      style={{
+                        backgroundColor: gitKrakenTheme.background.tertiary,
+                        color: gitKrakenTheme.accent.cyan,
+                      }}
+                    >
+                      {commit.sha.substring(0, 7)}
+                    </code>
+                    <button
+                      onClick={(e) => handleCopySha(commit.sha, e)}
+                      className="p-0.5 rounded transition-colors"
+                      style={{
+                        color: gitKrakenTheme.text.secondary,
+                      }}
+                      title="Copy SHA"
+                    >
+                      <Copy size={12} />
+                    </button>
+                  </div>
+                  <span>
+                    {formatDistanceToNow(commit.date, { addSuffix: true, locale: ko })}
+                  </span>
+                </div>
+
+                {/* Author */}
+                {commit.author.avatarUrl && (
+                  <div
+                    className="flex items-center gap-2 mt-2 text-xs"
+                    style={{ color: gitKrakenTheme.text.muted }}
                   >
-                    <Copy size={12} />
-                  </button>
-                </div>
-                <span>
-                  {formatDistanceToNow(commit.date, { addSuffix: true, locale: ko })}
-                </span>
+                    <img
+                      src={commit.author.avatarUrl}
+                      alt={commit.author.name}
+                      className="w-4 h-4 rounded-full"
+                    />
+                    <span className="truncate">{commit.author.name}</span>
+                  </div>
+                )}
               </div>
-
-              {/* Author */}
-              {commit.author.avatarUrl && (
-                <div className="flex items-center gap-2 mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  <img
-                    src={commit.author.avatarUrl}
-                    alt={commit.author.name}
-                    className="w-4 h-4 rounded-full"
-                  />
-                  <span className="truncate">{commit.author.name}</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
