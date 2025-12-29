@@ -336,8 +336,10 @@ export default function D3CommitGraph({
               selectedBranch={highlightedBranch || undefined}
               currentBranch={currentBranch}
               onBranchClick={(branchName) => {
-                // Toggle: 같은 브랜치 클릭 시 하이라이트 해제
-                setHighlightedBranch(prev => prev === branchName ? null : branchName);
+                console.log('Branch clicked:', branchName);
+              }}
+              onBranchHover={(branchName) => {
+                setHighlightedBranch(branchName);
               }}
             />
           </div>

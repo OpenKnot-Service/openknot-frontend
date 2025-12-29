@@ -18,6 +18,7 @@ interface BranchSidebarProps {
   selectedBranch?: string;
   currentBranch?: string;
   onBranchClick: (branchName: string) => void;
+  onBranchHover?: (branchName: string | null) => void;
 }
 
 // Helper function to get branch icon based on type
@@ -57,6 +58,7 @@ export default function BranchSidebar({
   selectedBranch,
   currentBranch,
   onBranchClick,
+  onBranchHover,
 }: BranchSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -101,6 +103,8 @@ export default function BranchSidebar({
               <button
                 key={branch.name}
                 onClick={() => onBranchClick(branch.name)}
+                onMouseEnter={() => onBranchHover?.(branch.name)}
+                onMouseLeave={() => onBranchHover?.(null)}
                 className={`
                   w-full flex items-center gap-2 px-3 py-1.5
                   transition-all text-left hover:scale-[1.02]
