@@ -275,14 +275,15 @@ export default function VerticalCommitGraph({
           });
         });
 
-      // 커밋 정보 텍스트 (GitKraken 스타일)
-      const textGroup = group.append('g').attr('transform', 'translate(10, 0)');
+      // 커밋 정보 텍스트 (GitKraken 스타일 - 오른쪽 정렬)
+      const textGroup = group.append('g').attr('transform', 'translate(-10, 0)');
 
       // 커밋 메시지
       textGroup
         .append('text')
         .attr('x', 0)
         .attr('y', 0)
+        .attr('text-anchor', 'end')
         .attr('dominant-baseline', 'middle')
         .attr('class', 'commit-message')
         .style('fill', isDark ? '#e5e7eb' : '#1f2937')
@@ -298,6 +299,7 @@ export default function VerticalCommitGraph({
         .append('text')
         .attr('x', 0)
         .attr('y', 16)
+        .attr('text-anchor', 'end')
         .attr('class', 'commit-meta')
         .style('fill', isDark ? '#9ca3af' : '#6b7280')
         .style('font-size', '11px')
