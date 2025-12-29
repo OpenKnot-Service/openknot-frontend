@@ -3,7 +3,6 @@ import * as d3 from 'd3';
 import { GitHubCommit, GitHubBranch } from '../../types';
 import { RotateCcw } from 'lucide-react';
 import BranchSidebar from './graph/BranchSidebar';
-import CommitInfoPanel from './graph/CommitInfoPanel';
 import VerticalCommitGraph from './graph/VerticalCommitGraph';
 import TopToolbar from './graph/TopToolbar';
 import { gitKrakenTheme } from '../../styles/gitkraken-theme';
@@ -308,7 +307,7 @@ export default function D3CommitGraph({
   // Calculate SVG dimensions for vertical layout
   const COMMIT_SPACING = 28;
   const BRANCH_SPACING = 25;
-  const svgWidth = Math.max(800, graphData.branchList.length * BRANCH_SPACING + 200);
+  const svgWidth = Math.max(1200, graphData.branchList.length * BRANCH_SPACING + 800); // 커밋 메시지 공간 추가
   const svgHeight = Math.max(600, graphData.nodes.length * COMMIT_SPACING + 100);
 
   const currentBranch = branches.find((b) => b.isDefault)?.name || 'main';
@@ -399,22 +398,6 @@ export default function D3CommitGraph({
             <span className="hidden sm:inline">Scroll to zoom • Drag to pan • </span>
             Click commit for details
           </div>
-        </div>
-
-        {/* Right: Commit Info Panel */}
-        <div
-          className="w-96 shrink-0 border-l"
-          style={{
-            backgroundColor: gitKrakenTheme.background.secondary,
-            borderColor: gitKrakenTheme.border.primary,
-          }}
-        >
-          <CommitInfoPanel
-            nodes={graphData.nodes}
-            onCommitClick={onCommitClick}
-            selectedSha={selectedCommitSha}
-            commitSpacing={COMMIT_SPACING}
-          />
         </div>
       </div>
     </div>

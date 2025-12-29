@@ -275,12 +275,34 @@ export default function VerticalCommitGraph({
           });
         });
 
-      // 툴팁
-      group
-        .append('title')
-        .text(
-          `${node.commit.message}\n${node.commit.author.name}\n${node.commit.sha.substring(0, 7)}`
-        );
+      // 커밋 정보 텍스트 (GitKraken 스타일)
+      const textGroup = group.append('g').attr('transform', 'translate(10, 0)');
+
+      // 커밋 메시지
+      textGroup
+        .append('text')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('dominant-baseline', 'middle')
+        .attr('class', 'commit-message')
+        .style('fill', isDark ? '#e5e7eb' : '#1f2937')
+        .style('font-size', '13px')
+        .style('font-weight', '500')
+        .style('user-select', 'none')
+        .text(node.commit.message.length > 60
+          ? node.commit.message.substring(0, 60) + '...'
+          : node.commit.message);
+
+      // 작성자 + SHA
+      textGroup
+        .append('text')
+        .attr('x', 0)
+        .attr('y', 16)
+        .attr('class', 'commit-meta')
+        .style('fill', isDark ? '#9ca3af' : '#6b7280')
+        .style('font-size', '11px')
+        .style('user-select', 'none')
+        .text(`${node.commit.author.name} • ${node.commit.sha.substring(0, 7)}`);
     });
   }, [
     nodes,
