@@ -315,7 +315,7 @@ export default function VerticalCommitGraph({
       // 커밋 정보 (오른쪽 정렬, 노드와 같은 높이)
       textGroup
         .append('text')
-        .attr('x', width - 16)
+        .attr('x', width - 60)
         .attr('y', node.y)
         .attr('text-anchor', 'end')
         .attr('dominant-baseline', 'middle')
