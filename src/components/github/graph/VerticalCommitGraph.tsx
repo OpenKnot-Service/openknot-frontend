@@ -181,12 +181,49 @@ export default function VerticalCommitGraph({
       .style('transition', `opacity ${TRANSITION_DURATION}ms ease`);
 
     /**
+     * 커밋 행 배경 (전체 너비)
+     */
+    const rowBgGroup = g.append('g').attr('class', 'commit-row-backgrounds');
+
+    nodes.forEach((node, index) => {
+      const isSelected = node.commit.sha === selectedSha;
+
+      // 전체 너비 배경
+      const rowBg = rowBgGroup
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', node.y - 14)
+        .attr('width', width)
+        .attr('height', 28)
+        .attr('class', `commit-row-bg commit-row-${node.commit.sha}`)
+        .style('fill', isSelected
+          ? (isDark ? '#1e3a5f' : '#dbeafe')
+          : (index % 2 === 0
+            ? (isDark ? 'transparent' : 'transparent')
+            : (isDark ? '#ffffff05' : '#00000005')))
+        .style('cursor', 'pointer')
+        .on('click', () => onCommitClick?.(node.commit))
+        .on('mouseenter', function() {
+          if (!isSelected) {
+            d3.select(this).style('fill', isDark ? '#ffffff08' : '#00000008');
+          }
+        })
+        .on('mouseleave', function() {
+          if (!isSelected) {
+            d3.select(this).style('fill', index % 2 === 0
+              ? (isDark ? 'transparent' : 'transparent')
+              : (isDark ? '#ffffff05' : '#00000005'));
+          }
+        });
+    });
+
+    /**
      * 커밋 노드 그리기
      * hover 시 관련 브랜치 라인 강조
      */
     const nodeGroup = g.append('g').attr('class', 'commit-nodes');
 
-    nodes.forEach((node) => {
+    nodes.forEach((node, index) => {
       const group = nodeGroup
         .append('g')
         .attr('transform', `translate(${node.x}, ${node.y})`)
@@ -256,32 +293,19 @@ export default function VerticalCommitGraph({
           });
         });
 
-      // 커밋 정보 텍스트 (GitKraken 스타일 - 오른쪽 정렬)
-      const textGroup = group.append('g').attr('transform', 'translate(-10, 0)');
+      // 커밋 정보 텍스트 (전체 너비 기준 오른쪽 정렬)
+      const textGroup = g.append('g').attr('transform', `translate(0, ${node.y})`);
 
-      // 텍스트 길이 계산 (대략적)
-      const messageText = node.commit.message.length > 60
-        ? node.commit.message.substring(0, 60) + '...'
+      // 텍스트 내용
+      const messageText = node.commit.message.length > 80
+        ? node.commit.message.substring(0, 80) + '...'
         : node.commit.message;
       const metaText = `${node.commit.author.name} • ${node.commit.sha.substring(0, 7)}`;
-      const estimatedWidth = Math.max(messageText.length * 7, metaText.length * 6) + 16;
 
-      // 배경 (브랜치 색상)
-      textGroup
-        .append('rect')
-        .attr('x', -estimatedWidth)
-        .attr('y', -12)
-        .attr('width', estimatedWidth)
-        .attr('height', 32)
-        .attr('rx', 4)
-        .attr('class', 'commit-bg')
-        .style('fill', node.color)
-        .style('opacity', isDark ? 0.15 : 0.1);
-
-      // 커밋 메시지
+      // 커밋 메시지 (오른쪽 정렬)
       textGroup
         .append('text')
-        .attr('x', -8)
+        .attr('x', width - 16)
         .attr('y', 0)
         .attr('text-anchor', 'end')
         .attr('dominant-baseline', 'middle')
@@ -292,11 +316,11 @@ export default function VerticalCommitGraph({
         .style('user-select', 'none')
         .text(messageText);
 
-      // 작성자 + SHA
+      // 작성자 + SHA (오른쪽 정렬)
       textGroup
         .append('text')
-        .attr('x', -8)
-        .attr('y', 16)
+        .attr('x', width - 16)
+        .attr('y', 14)
         .attr('text-anchor', 'end')
         .attr('class', 'commit-meta')
         .style('fill', isDark ? '#9ca3af' : '#6b7280')
