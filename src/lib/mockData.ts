@@ -3479,7 +3479,7 @@ const productionCommits: GitHubCommit[] = [
       email: 'eve@example.com',
     },
     date: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4시간 전
-    parents: ['e7b4c2d'], // 알림 버그 수정 이후
+    parents: ['c7e5a2b'], // Hotfix 병합 이후
     branch: ['main'],
     stats: { additions: 15, deletions: 8, total: 23 },
     files: [{ filename: 'src/main/kotlin/config/RedisConfig.kt', additions: 15, deletions: 8, changes: 23, status: 'modified' }],
@@ -3795,7 +3795,7 @@ const productionCommits: GitHubCommit[] = [
       name: 'Yoon Jiyoung',
       email: 'yoon@example.com',
     },
-    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7일 전
+    date: new Date(Date.now() - 6.7 * 24 * 60 * 60 * 1000), // 7일 전
     parents: ['m5c2a9e'], // main에서 분기
     branch: ['feature/offline-mode'],
     stats: { additions: 234, deletions: 0, total: 234 },
@@ -3865,7 +3865,7 @@ const productionCommits: GitHubCommit[] = [
       name: 'Kang Minsu',
       email: 'kang@example.com',
     },
-    date: new Date(Date.now() - 1.2 * 24 * 60 * 60 * 1000), // 1.2일 전
+    date: new Date(Date.now() - 0.3 * 24 * 60 * 60 * 1000), // 1.2일 전
     parents: ['k8s3b2a'], // K8s 이전
     branch: ['upgrade/k8s-1.28'],
     stats: { additions: 58, deletions: 33, total: 91 },
@@ -3887,7 +3887,7 @@ const productionCommits: GitHubCommit[] = [
       name: 'Kang Minsu',
       email: 'kang@example.com',
     },
-    date: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000), // 1.5일 전
+    date: new Date(Date.now() - 0.5 * 24 * 60 * 60 * 1000), // 1.5일 전
     parents: ['c3a8f9e'], // main에서 분기 (파일 트리 뷰어 직후)
     branch: ['upgrade/k8s-1.28'],
     stats: { additions: 87, deletions: 65, total: 152 },
@@ -4286,7 +4286,7 @@ const productionIssues: GitHubIssue[] = [
     assignees: ['kang-devops'],
     labels: ['infrastructure', 'upgrade'],
     comments: [],
-    createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+    createdAt: new Date(Date.now() - 0.5 * 24 * 60 * 60 * 1000),
     updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
   },
   // Additional open issues (medium/low priority)
