@@ -1,6 +1,12 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { GitHubCommit } from '../../../types';
+import {
+  generateBranchPath,
+  findAncestors,
+  getBranchLines,
+  type GraphNode as GraphNodeType,
+} from '../../../utils/gitGraphUtils';
 
 interface GraphNode {
   commit: GitHubCommit;
@@ -24,10 +30,18 @@ interface VerticalCommitGraphProps {
   onTransformChange: (transform: d3.ZoomTransform) => void;
 }
 
+// 시각적 상수
 const NODE_RADIUS = 2;
 const SELECTED_NODE_RADIUS = 4;
+const HOVER_NODE_RADIUS = 6;
 const LINE_WIDTH = 1.5;
 const BRANCH_SPACING = 25;
+
+// 애니메이션 상수
+const TRANSITION_DURATION = 200; // ms
+const LINE_HIGHLIGHT_OPACITY = 1.0;
+const LINE_DIM_OPACITY = 0.25;
+const LINE_NORMAL_OPACITY = 0.8;
 
 export default function VerticalCommitGraph({
   nodes,
@@ -42,6 +56,7 @@ export default function VerticalCommitGraph({
   onTransformChange,
 }: VerticalCommitGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const [hoveredBranch, setHoveredBranch] = useState<string | null>(null);
 
   useEffect(() => {
     if (!svgRef.current || nodes.length === 0) return;
@@ -49,10 +64,10 @@ export default function VerticalCommitGraph({
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
-    // Set dimensions
+    // SVG 크기 설정
     svg.attr('width', width).attr('height', height);
 
-    // Create zoom behavior
+    // 줌 동작 설정
     const zoom = d3
       .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.5, 2])
@@ -67,21 +82,24 @@ export default function VerticalCommitGraph({
 
     svg.call(zoom);
 
-    // Create main group
+    // 메인 그룹 생성
     const g = svg.append('g').attr('transform', transform.toString());
 
-    // Helper function to get parents to render
+    /**
+     * 렌더링할 부모 커밋 찾기
+     * 실제 부모 우선, 없으면 가상 부모 사용
+     */
     const getParentsToRender = (node: GraphNode): string[] => {
       const parentsToRender: string[] = [];
 
-      // Add actual parents
+      // 실제 부모 추가
       node.commit.parents.forEach((parentSha) => {
         if (commitMap.has(parentSha)) {
           parentsToRender.push(parentSha);
         }
       });
 
-      // Add virtual parent if no valid parents
+      // 부모가 없으면 가상 부모 추가
       if (parentsToRender.length === 0) {
         const virtualParent = virtualParents.get(node.commit.sha);
         if (virtualParent && commitMap.has(virtualParent)) {
@@ -92,26 +110,40 @@ export default function VerticalCommitGraph({
       return parentsToRender;
     };
 
-    // Helper function to generate line path
-    const generateLinePath = (
-      node: GraphNode,
-      parent: GraphNode,
-      isMerge: boolean
-    ): string => {
-      const isCrossBranch = Math.abs(node.x - parent.x) > BRANCH_SPACING / 2;
+    /**
+     * 선택된 커밋의 조상 경로 계산
+     */
+    const ancestorSet = selectedSha
+      ? findAncestors(
+          selectedSha,
+          commitMap as Map<string, GraphNodeType>,
+          virtualParents
+        )
+      : new Set<string>();
 
-      if (isCrossBranch || isMerge) {
-        // Curved line using cubic Bezier (vertical flow)
-        const midY = (node.y + parent.y) / 2;
-        return `M ${node.x} ${node.y} C ${node.x} ${midY}, ${parent.x} ${midY}, ${parent.x} ${parent.y}`;
-      } else {
-        // Straight line for same branch
-        return `M ${node.x} ${node.y} L ${parent.x} ${parent.y}`;
-      }
-    };
+    // 선택된 커밋도 포함
+    if (selectedSha) {
+      ancestorSet.add(selectedSha);
+    }
 
-    // Draw lines between commits
-    const lines = g.append('g').attr('class', 'commit-lines');
+    /**
+     * 브랜치 라인 그리기
+     * 각 라인은 브랜치별로 그룹화되며, hover 시 강조됨
+     */
+    const linesGroup = g.append('g').attr('class', 'commit-lines');
+
+    // 라인 데이터 생성
+    interface LineData {
+      id: string; // 고유 ID (node.sha + parent.sha)
+      node: GraphNode;
+      parent: GraphNode;
+      path: string;
+      branchName: string;
+      isMerge: boolean;
+      isInSelectedPath: boolean;
+    }
+
+    const lineDataArray: LineData[] = [];
 
     nodes.forEach((node) => {
       const parentsToRender = getParentsToRender(node);
@@ -121,53 +153,129 @@ export default function VerticalCommitGraph({
         if (!parent) return;
 
         const isMerge = node.commit.parents.length > 1;
-        const path = generateLinePath(node, parent, isMerge);
+        const path = generateBranchPath(
+          node as GraphNodeType,
+          parent as GraphNodeType,
+          isMerge,
+          BRANCH_SPACING
+        );
 
-        lines
-          .append('path')
-          .attr('d', path)
-          .attr('stroke', node.color)
-          .attr('stroke-width', LINE_WIDTH)
-          .attr('fill', 'none')
-          .attr('opacity', 0.8); // Brighter for better visibility
+        const branchName = node.commit.branch[0] || 'unknown';
+
+        // 선택된 경로에 포함되는지 확인
+        const isInSelectedPath =
+          ancestorSet.has(node.commit.sha) && ancestorSet.has(parent.commit.sha);
+
+        lineDataArray.push({
+          id: `${node.commit.sha}-${parent.commit.sha}`,
+          node,
+          parent,
+          path,
+          branchName,
+          isMerge,
+          isInSelectedPath,
+        });
       });
     });
 
-    // Draw commit nodes
+    // 라인 렌더링
+    linesGroup
+      .selectAll('path')
+      .data(lineDataArray)
+      .enter()
+      .append('path')
+      .attr('class', (d) => `branch-line branch-${d.branchName.replace(/[^a-zA-Z0-9]/g, '_')}`)
+      .attr('d', (d) => d.path)
+      .attr('stroke', (d) => d.node.color)
+      .attr('stroke-width', LINE_WIDTH)
+      .attr('fill', 'none')
+      .attr('opacity', (d) => {
+        // 선택된 경로는 항상 밝게
+        if (d.isInSelectedPath) return LINE_HIGHLIGHT_OPACITY;
+        // 기본 opacity
+        return LINE_NORMAL_OPACITY;
+      })
+      .attr('stroke-linecap', 'round')
+      .attr('stroke-linejoin', 'round')
+      .style('transition', `opacity ${TRANSITION_DURATION}ms ease`);
+
+    /**
+     * 커밋 노드 그리기
+     * hover 시 관련 브랜치 라인 강조
+     */
     const nodeGroup = g.append('g').attr('class', 'commit-nodes');
 
     nodes.forEach((node) => {
       const group = nodeGroup
         .append('g')
         .attr('transform', `translate(${node.x}, ${node.y})`)
+        .attr('class', `commit-node commit-${node.commit.sha}`)
         .style('cursor', 'pointer')
         .on('click', () => onCommitClick?.(node.commit));
 
       const isSelected = node.commit.sha === selectedSha;
+      const branchName = node.commit.branch[0] || 'unknown';
 
-      // Node circle
-      group
+      // 노드 원 그리기
+      const circle = group
         .append('circle')
         .attr('r', isSelected ? SELECTED_NODE_RADIUS : NODE_RADIUS)
         .attr('fill', isSelected ? node.color : isDark ? '#1f2937' : '#ffffff')
         .attr('stroke', node.color)
         .attr('stroke-width', 2)
+        .attr('class', 'node-circle')
+        .style('transition', `all ${TRANSITION_DURATION}ms ease`);
+
+      // Hover 이벤트: 노드 + 브랜치 라인 강조
+      group
         .on('mouseenter', function () {
-          d3.select(this)
+          // 노드 크기 증가
+          circle
             .transition()
-            .duration(200)
-            .attr('r', SELECTED_NODE_RADIUS + 2)
+            .duration(TRANSITION_DURATION)
+            .attr('r', HOVER_NODE_RADIUS)
             .attr('stroke-width', 3);
+
+          // 해당 브랜치의 모든 라인 찾기
+          const branchCommits = getBranchLines(
+            node.commit.sha,
+            commitMap as Map<string, GraphNodeType>,
+            nodes as GraphNodeType[]
+          );
+
+          // 라인 강조/흐리게 처리
+          linesGroup.selectAll('path').attr('opacity', function (this: any, d: any) {
+            // 선택된 경로는 항상 밝게 유지
+            if (d.isInSelectedPath) return LINE_HIGHLIGHT_OPACITY;
+
+            // hover된 브랜치의 라인만 강조
+            if (
+              branchCommits.has(d.node.commit.sha) ||
+              branchCommits.has(d.parent.commit.sha)
+            ) {
+              return LINE_HIGHLIGHT_OPACITY;
+            }
+
+            // 나머지는 흐리게
+            return LINE_DIM_OPACITY;
+          });
         })
         .on('mouseleave', function () {
-          d3.select(this)
+          // 노드 원래 크기로
+          circle
             .transition()
-            .duration(200)
+            .duration(TRANSITION_DURATION)
             .attr('r', isSelected ? SELECTED_NODE_RADIUS : NODE_RADIUS)
             .attr('stroke-width', 2);
+
+          // 라인 원래 opacity로
+          linesGroup.selectAll('path').attr('opacity', function (this: any, d: any) {
+            if (d.isInSelectedPath) return LINE_HIGHLIGHT_OPACITY;
+            return LINE_NORMAL_OPACITY;
+          });
         });
 
-      // Tooltip
+      // 툴팁
       group
         .append('title')
         .text(
@@ -187,5 +295,15 @@ export default function VerticalCommitGraph({
     onTransformChange,
   ]);
 
-  return <svg ref={svgRef} className="w-full h-full" />;
+  return (
+    <svg
+      ref={svgRef}
+      className="w-full h-full git-graph"
+      style={{
+        // CSS 변수로 테마 색상 전달 (향후 확장용)
+        ['--node-radius' as any]: `${NODE_RADIUS}px`,
+        ['--line-width' as any]: `${LINE_WIDTH}px`,
+      }}
+    />
+  );
 }
