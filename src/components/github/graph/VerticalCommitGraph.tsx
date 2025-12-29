@@ -278,10 +278,29 @@ export default function VerticalCommitGraph({
       // 커밋 정보 텍스트 (GitKraken 스타일 - 오른쪽 정렬)
       const textGroup = group.append('g').attr('transform', 'translate(-10, 0)');
 
+      // 텍스트 길이 계산 (대략적)
+      const messageText = node.commit.message.length > 60
+        ? node.commit.message.substring(0, 60) + '...'
+        : node.commit.message;
+      const metaText = `${node.commit.author.name} • ${node.commit.sha.substring(0, 7)}`;
+      const estimatedWidth = Math.max(messageText.length * 7, metaText.length * 6) + 16;
+
+      // 배경 (브랜치 색상)
+      textGroup
+        .append('rect')
+        .attr('x', -estimatedWidth)
+        .attr('y', -12)
+        .attr('width', estimatedWidth)
+        .attr('height', 32)
+        .attr('rx', 4)
+        .attr('class', 'commit-bg')
+        .style('fill', node.color)
+        .style('opacity', isDark ? 0.15 : 0.1);
+
       // 커밋 메시지
       textGroup
         .append('text')
-        .attr('x', 0)
+        .attr('x', -8)
         .attr('y', 0)
         .attr('text-anchor', 'end')
         .attr('dominant-baseline', 'middle')
@@ -290,21 +309,19 @@ export default function VerticalCommitGraph({
         .style('font-size', '13px')
         .style('font-weight', '500')
         .style('user-select', 'none')
-        .text(node.commit.message.length > 60
-          ? node.commit.message.substring(0, 60) + '...'
-          : node.commit.message);
+        .text(messageText);
 
       // 작성자 + SHA
       textGroup
         .append('text')
-        .attr('x', 0)
+        .attr('x', -8)
         .attr('y', 16)
         .attr('text-anchor', 'end')
         .attr('class', 'commit-meta')
         .style('fill', isDark ? '#9ca3af' : '#6b7280')
         .style('font-size', '11px')
         .style('user-select', 'none')
-        .text(`${node.commit.author.name} • ${node.commit.sha.substring(0, 7)}`);
+        .text(metaText);
     });
   }, [
     nodes,
