@@ -29,9 +29,9 @@ interface VerticalCommitGraphProps {
 }
 
 // 시각적 상수
-const NODE_RADIUS = 2;
-const SELECTED_NODE_RADIUS = 4;
-const HOVER_NODE_RADIUS = 6;
+const NODE_RADIUS = 4;
+const SELECTED_NODE_RADIUS = 6;
+const HOVER_NODE_RADIUS = 8;
 const LINE_WIDTH = 1.5;
 const BRANCH_SPACING = 25;
 
