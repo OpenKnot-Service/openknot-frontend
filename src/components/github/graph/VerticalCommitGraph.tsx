@@ -318,8 +318,9 @@ export default function VerticalCommitGraph({
   return (
     <svg
       ref={svgRef}
-      className="w-full h-full git-graph"
+      className="git-graph"
       style={{
+        display: 'block',
         // CSS 변수로 테마 색상 전달 (향후 확장용)
         ['--node-radius' as any]: `${NODE_RADIUS}px`,
         ['--line-width' as any]: `${LINE_WIDTH}px`,
