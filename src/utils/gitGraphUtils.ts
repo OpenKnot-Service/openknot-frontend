@@ -53,36 +53,43 @@ export function createStraightPath(from: Point, to: Point): string {
 }
 
 /**
- * 부드러운 곡선 경로 생성 (브랜치 병합/분기)
- * Cubic Bezier Curve 사용
+ * GitKraken 스타일 각진 경로 (꺾이는 부분만 round)
+ * stroke-linejoin="round"와 함께 사용
  *
  * @param from - 시작점 (자식 커밋)
  * @param to - 끝점 (부모 커밋)
- * @param curvature - 곡선 강도 (0~1, 기본값 0.5)
+ * @param cornerRadius - 코너 둥글기 (기본값 8)
  */
-export function createCurvedPath(
+export function createAngularPath(
   from: Point,
   to: Point,
-  curvature: number = 0.5
+  cornerRadius: number = 8
 ): string {
-  // 제어점 계산 (Y축 중간점 기준)
-  const midY = from.y + (to.y - from.y) * curvature;
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const midY = from.y + dy * 0.5;
 
-  // Cubic Bezier: M start C cp1x cp1y, cp2x cp2y, end
-  // 첫 번째 제어점: from의 x 유지, midY
-  // 두 번째 제어점: to의 x 유지, midY
-  return `M ${from.x} ${from.y} C ${from.x} ${midY}, ${to.x} ${midY}, ${to.x} ${to.y}`;
+  // 수평 이동이 없으면 직선
+  if (Math.abs(dx) < 1) {
+    return `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
+  }
+
+  // GitKraken 스타일: 직각으로 꺾임
+  // 1. 시작점에서 수직으로 midY까지
+  // 2. 수평으로 to.x까지
+  // 3. 수직으로 to.y까지
+  return `M ${from.x} ${from.y} L ${from.x} ${midY} L ${to.x} ${midY} L ${to.x} ${to.y}`;
 }
 
 /**
- * 고급 곡선 경로 생성 (GitKraken 스타일)
- * S자 곡선으로 더 자연스러운 병합 표현
+ * 고급 각진 경로 (병합 시 2단계 꺾임)
+ * 병합 커밋일 때 더 자연스러운 경로
  *
  * @param from - 시작점
  * @param to - 끝점
  * @param isMerge - 병합 커밋 여부
  */
-export function createAdvancedCurvedPath(
+export function createAdvancedAngularPath(
   from: Point,
   to: Point,
   isMerge: boolean = false
@@ -90,20 +97,29 @@ export function createAdvancedCurvedPath(
   const dx = to.x - from.x;
   const dy = to.y - from.y;
 
-  // 병합일 경우 더 부드러운 곡선 사용
-  if (isMerge) {
-    // 3단계 베지어 곡선으로 S자 형태 생성
-    const cp1y = from.y + dy * 0.3;
-    const cp2y = from.y + dy * 0.7;
-
-    return `M ${from.x} ${from.y}
-            C ${from.x} ${cp1y}, ${from.x + dx * 0.3} ${cp1y}, ${from.x + dx * 0.5} ${from.y + dy * 0.5}
-            S ${to.x} ${cp2y}, ${to.x} ${to.y}`;
+  // 수평 이동이 없으면 직선
+  if (Math.abs(dx) < 1) {
+    return `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
   }
 
-  // 일반 분기는 단순한 곡선
-  const midY = from.y + dy * 0.5;
-  return `M ${from.x} ${from.y} C ${from.x} ${midY}, ${to.x} ${midY}, ${to.x} ${to.y}`;
+  if (isMerge) {
+    // 병합: 3단계 꺾임 (더 부드러운 병합 느낌)
+    const y1 = from.y + dy * 0.3;
+    const y2 = from.y + dy * 0.7;
+
+    return `M ${from.x} ${from.y}
+            L ${from.x} ${y1}
+            L ${to.x} ${y2}
+            L ${to.x} ${to.y}`;
+  } else {
+    // 일반 분기: 2단계 꺾임 (중간 지점)
+    const midY = from.y + dy * 0.5;
+
+    return `M ${from.x} ${from.y}
+            L ${from.x} ${midY}
+            L ${to.x} ${midY}
+            L ${to.x} ${to.y}`;
+  }
 }
 
 /**
@@ -127,8 +143,8 @@ export function generateBranchPath(
   const crossBranch = isCrossBranch(node, parent, branchSpacing);
 
   if (crossBranch || isMerge) {
-    // 브랜치 간 이동 또는 병합: 곡선 사용
-    return createAdvancedCurvedPath(from, to, isMerge);
+    // 브랜치 간 이동 또는 병합: 각진 경로 사용
+    return createAdvancedAngularPath(from, to, isMerge);
   } else {
     // 같은 브랜치 내: 직선 사용
     return createStraightPath(from, to);
