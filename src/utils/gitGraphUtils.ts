@@ -121,28 +121,15 @@ export function createAdvancedAngularPath(
   const r = Math.min(cornerRadius, Math.abs(dy) * 0.15, Math.abs(dx) * 0.5);
   const direction = dx > 0 ? 1 : -1;
 
-  if (isMerge) {
-    // 병합: 3단계 꺾임 (더 부드러운 병합 느낌)
-    const y1 = from.y + dy * 0.3;
-    const y2 = from.y + dy * 0.7;
+  // 병합이든 일반 분기든 동일한 직각 경로 사용
+  const midY = from.y + dy * 0.5;
 
-    return `M ${from.x} ${from.y}
-            L ${from.x} ${y1 - r}
-            Q ${from.x} ${y1} ${from.x + direction * r} ${y1}
-            L ${to.x - direction * r} ${y2}
-            Q ${to.x} ${y2} ${to.x} ${y2 + r}
-            L ${to.x} ${to.y}`;
-  } else {
-    // 일반 분기: 2단계 꺾임 (중간 지점)
-    const midY = from.y + dy * 0.5;
-
-    return `M ${from.x} ${from.y}
-            L ${from.x} ${midY - r}
-            Q ${from.x} ${midY} ${from.x + direction * r} ${midY}
-            L ${to.x - direction * r} ${midY}
-            Q ${to.x} ${midY} ${to.x} ${midY + r}
-            L ${to.x} ${to.y}`;
-  }
+  return `M ${from.x} ${from.y}
+          L ${from.x} ${midY - r}
+          Q ${from.x} ${midY} ${from.x + direction * r} ${midY}
+          L ${to.x - direction * r} ${midY}
+          Q ${to.x} ${midY} ${to.x} ${midY + r}
+          L ${to.x} ${to.y}`;
 }
 
 /**
