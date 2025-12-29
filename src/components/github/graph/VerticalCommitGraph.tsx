@@ -25,6 +25,7 @@ interface VerticalCommitGraphProps {
   height: number;
   isDark: boolean;
   selectedSha?: string;
+  highlightedBranch?: string | null;
   onCommitClick?: (commit: GitHubCommit) => void;
 }
 
@@ -49,6 +50,7 @@ export default function VerticalCommitGraph({
   height,
   isDark,
   selectedSha,
+  highlightedBranch,
   onCommitClick,
 }: VerticalCommitGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -176,6 +178,12 @@ export default function VerticalCommitGraph({
       .attr('opacity', (d) => {
         // 선택된 경로는 항상 밝게
         if (d.isInSelectedPath) return LINE_HIGHLIGHT_OPACITY;
+
+        // 브랜치 하이라이트: 선택된 브랜치가 있으면 다른 브랜치는 흐리게
+        if (highlightedBranch) {
+          return d.branchName === highlightedBranch ? LINE_HIGHLIGHT_OPACITY : LINE_DIM_OPACITY;
+        }
+
         // 기본 opacity
         return LINE_NORMAL_OPACITY;
       })
@@ -337,6 +345,7 @@ export default function VerticalCommitGraph({
     height,
     isDark,
     selectedSha,
+    highlightedBranch,
     onCommitClick,
   ]);
 

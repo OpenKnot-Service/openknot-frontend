@@ -116,6 +116,7 @@ export default function D3CommitGraph({
 }: D3CommitGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(false);
+  const [highlightedBranch, setHighlightedBranch] = useState<string | null>(null);
 
   // Detect dark mode
   useEffect(() => {
@@ -332,10 +333,11 @@ export default function D3CommitGraph({
           <div className="flex-1 overflow-hidden">
             <BranchSidebar
               branches={graphData.branchList}
-              selectedBranch={filters?.branch}
+              selectedBranch={highlightedBranch || undefined}
               currentBranch={currentBranch}
               onBranchClick={(branchName) => {
-                console.log('Branch clicked:', branchName);
+                // Toggle: 같은 브랜치 클릭 시 하이라이트 해제
+                setHighlightedBranch(prev => prev === branchName ? null : branchName);
               }}
             />
           </div>
@@ -359,6 +361,7 @@ export default function D3CommitGraph({
               height={svgHeight}
               isDark={isDark}
               selectedSha={selectedCommitSha}
+              highlightedBranch={highlightedBranch}
               onCommitClick={onCommitClick}
             />
           </div>
