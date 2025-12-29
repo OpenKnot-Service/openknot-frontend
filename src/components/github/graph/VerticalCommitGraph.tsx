@@ -26,8 +26,6 @@ interface VerticalCommitGraphProps {
   isDark: boolean;
   selectedSha?: string;
   onCommitClick?: (commit: GitHubCommit) => void;
-  transform: d3.ZoomTransform;
-  onTransformChange: (transform: d3.ZoomTransform) => void;
 }
 
 // 시각적 상수
@@ -52,8 +50,6 @@ export default function VerticalCommitGraph({
   isDark,
   selectedSha,
   onCommitClick,
-  transform,
-  onTransformChange,
 }: VerticalCommitGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hoveredBranch, setHoveredBranch] = useState<string | null>(null);
@@ -67,23 +63,8 @@ export default function VerticalCommitGraph({
     // SVG 크기 설정
     svg.attr('width', width).attr('height', height);
 
-    // 줌 동작 설정
-    const zoom = d3
-      .zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.5, 2])
-      .translateExtent([
-        [-100, -100],
-        [width + 100, height + 100],
-      ])
-      .on('zoom', (event) => {
-        onTransformChange(event.transform);
-        g.attr('transform', event.transform.toString());
-      });
-
-    svg.call(zoom);
-
-    // 메인 그룹 생성
-    const g = svg.append('g').attr('transform', transform.toString());
+    // 메인 그룹 생성 (줌 없이)
+    const g = svg.append('g');
 
     /**
      * 렌더링할 부모 커밋 찾기
@@ -332,8 +313,6 @@ export default function VerticalCommitGraph({
     isDark,
     selectedSha,
     onCommitClick,
-    transform,
-    onTransformChange,
   ]);
 
   return (

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import { GitHubCommit, GitHubBranch } from '../../types';
-import { RotateCcw } from 'lucide-react';
 import BranchSidebar from './graph/BranchSidebar';
 import VerticalCommitGraph from './graph/VerticalCommitGraph';
 import TopToolbar from './graph/TopToolbar';
@@ -117,7 +116,6 @@ export default function D3CommitGraph({
 }: D3CommitGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(false);
-  const [transform, setTransform] = useState<d3.ZoomTransform>(d3.zoomIdentity);
 
   // Detect dark mode
   useEffect(() => {
@@ -299,11 +297,6 @@ export default function D3CommitGraph({
     return { nodes, commitMap, columnAssignments, branchList, virtualParents };
   }, [filteredCommits, isDark]);
 
-  // Handle zoom reset
-  const handleResetZoom = () => {
-    setTransform(d3.zoomIdentity);
-  };
-
   // Calculate SVG dimensions for vertical layout
   const COMMIT_SPACING = 28;
   const BRANCH_SPACING = 25;
@@ -350,26 +343,12 @@ export default function D3CommitGraph({
 
         {/* Center: Graph Container */}
         <div className="flex-1 min-w-0 relative flex flex-col">
-          {/* Reset Zoom Button */}
-          <button
-            onClick={handleResetZoom}
-            className="absolute right-4 top-4 z-10 rounded-md p-2 shadow-lg transition-all hover:scale-110"
-            style={{
-              backgroundColor: gitKrakenTheme.background.tertiary,
-              color: gitKrakenTheme.text.primary,
-            }}
-            title="Reset Zoom"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </button>
-
-          {/* SVG Container */}
+          {/* SVG Container - 스크롤 가능 */}
           <div
             ref={containerRef}
-            className="flex-1 overflow-hidden"
+            className="flex-1 overflow-auto"
             style={{
               backgroundColor: gitKrakenTheme.background.primary,
-              height: `${svgHeight}px`,
             }}
           >
             <VerticalCommitGraph
@@ -381,8 +360,6 @@ export default function D3CommitGraph({
               isDark={isDark}
               selectedSha={selectedCommitSha}
               onCommitClick={onCommitClick}
-              transform={transform}
-              onTransformChange={setTransform}
             />
           </div>
 
@@ -395,7 +372,7 @@ export default function D3CommitGraph({
               borderColor: gitKrakenTheme.border.primary,
             }}
           >
-            <span className="hidden sm:inline">Scroll to zoom • Drag to pan • </span>
+            <span className="hidden sm:inline">Scroll to view commits • </span>
             Click commit for details
           </div>
         </div>
