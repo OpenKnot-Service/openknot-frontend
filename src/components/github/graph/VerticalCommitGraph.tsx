@@ -7,8 +7,6 @@ import {
   getBranchLines,
   type GraphNode as GraphNodeType,
 } from '../../../utils/gitGraphUtils';
-import { Tooltip } from '../../ui/Tooltip';
-import { CommitTooltip } from '../../ui/CommitTooltip';
 
 interface GraphNode {
   commit: GitHubCommit;
@@ -306,7 +304,34 @@ export default function VerticalCommitGraph({
           });
         });
 
-      // 커밋 정보는 이제 툴팁으로 표시됨
+      // 커밋 정보 텍스트 렌더링
+    });
+
+    // 텍스트를 마지막에 그려서 맨 위에 표시 (한 줄로 간략하게)
+    const textGroup = g.append('g').attr('class', 'commit-texts');
+
+    nodes.forEach((node) => {
+      // 커밋 메시지 간략화
+      const messageText = node.commit.message.length > 60
+        ? node.commit.message.substring(0, 60) + '...'
+        : node.commit.message;
+
+      // 한 줄로 표시: 메시지 + 작성자 + SHA
+      const combinedText = `${messageText}  •  ${node.commit.author.name}  •  ${node.commit.sha.substring(0, 7)}`;
+
+      // 커밋 정보 (오른쪽 정렬, 노드와 같은 높이)
+      textGroup
+        .append('text')
+        .attr('x', containerWidth - 20)
+        .attr('y', node.y)
+        .attr('text-anchor', 'end')
+        .attr('dominant-baseline', 'middle')
+        .attr('class', 'commit-info')
+        .style('fill', isDark ? '#e5e7eb' : '#1f2937')
+        .style('font-size', '13px')
+        .style('user-select', 'none')
+        .style('pointer-events', 'none')
+        .text(combinedText);
     });
   }, [
     nodes,
@@ -321,39 +346,15 @@ export default function VerticalCommitGraph({
   ]);
 
   return (
-    <div className="relative">
-      <svg
-        ref={svgRef}
-        className="git-graph"
-        style={{
-          display: 'block',
-          // CSS 변수로 테마 색상 전달 (향후 확장용)
-          ['--node-radius' as any]: `${NODE_RADIUS}px`,
-          ['--line-width' as any]: `${LINE_WIDTH}px`,
-        }}
-      />
-
-      {/* HTML 오버레이: 각 노드에 툴팁 추가 */}
-      <div className="absolute inset-0 pointer-events-none">
-        {nodes.map((node) => (
-          <div
-            key={node.commit.sha}
-            className="absolute pointer-events-auto"
-            style={{
-              left: `${node.x - 10}px`,
-              top: `${node.y - 10}px`,
-              width: '20px',
-              height: '20px',
-            }}
-          >
-            <Tooltip
-              content={<CommitTooltip commit={node.commit} />}
-            >
-              <div className="w-full h-full" />
-            </Tooltip>
-          </div>
-        ))}
-      </div>
-    </div>
+    <svg
+      ref={svgRef}
+      className="git-graph"
+      style={{
+        display: 'block',
+        // CSS 변수로 테마 색상 전달 (향후 확장용)
+        ['--node-radius' as any]: `${NODE_RADIUS}px`,
+        ['--line-width' as any]: `${LINE_WIDTH}px`,
+      }}
+    />
   );
 }
