@@ -207,9 +207,9 @@ export default function VerticalCommitGraph({
       rowBgGroup
         .append('rect')
         .attr('x', 0)
-        .attr('y', node.y - 14)
+        .attr('y', node.y - 20)
         .attr('width', containerWidth)
-        .attr('height', 28)
+        .attr('height', 40)
         .attr('class', `commit-row-bg commit-row-${node.commit.sha}`)
         .style('fill', isSelected
           ? (isDark ? '#1e3a5f' : '#dbeafe')

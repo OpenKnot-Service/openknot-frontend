@@ -178,7 +178,7 @@ export default function D3CommitGraph({
       const node: GraphNode = {
         commit,
         x: column * 25 + 30,   // Branch (horizontal) - 25px between branches
-        y: index * 28 + 20,    // Time (vertical) - 28px between commits (compact)
+        y: index * 40 + 20,    // Time (vertical) - 40px between commits
         column,
         color,
         timeIndex: index,
@@ -298,7 +298,7 @@ export default function D3CommitGraph({
   }, [filteredCommits, isDark]);
 
   // Calculate SVG dimensions for vertical layout
-  const COMMIT_SPACING = 28;
+  const COMMIT_SPACING = 40;
   const BRANCH_SPACING = 25;
   const svgWidth = Math.max(1200, graphData.branchList.length * BRANCH_SPACING + 800); // 커밋 메시지 공간 추가
   const svgHeight = Math.max(600, graphData.nodes.length * COMMIT_SPACING + 100);
