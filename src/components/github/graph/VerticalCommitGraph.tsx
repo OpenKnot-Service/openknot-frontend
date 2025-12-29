@@ -302,41 +302,29 @@ export default function VerticalCommitGraph({
       // 커밋 정보 텍스트는 별도 루프에서 처리 (맨 위에 렌더링)
     });
 
-    // 텍스트를 마지막에 그려서 맨 위에 표시
+    // 텍스트를 마지막에 그려서 맨 위에 표시 (한 줄로 간략하게)
     nodes.forEach((node, index) => {
-      // 텍스트 내용
-      const messageText = node.commit.message.length > 80
-        ? node.commit.message.substring(0, 80) + '...'
+      // 커밋 메시지 간략화
+      const messageText = node.commit.message.length > 60
+        ? node.commit.message.substring(0, 60) + '...'
         : node.commit.message;
-      const metaText = `${node.commit.author.name} • ${node.commit.sha.substring(0, 7)}`;
 
-      // 커밋 메시지 (오른쪽 정렬)
+      // 한 줄로 표시: 메시지 + 작성자 + SHA
+      const combinedText = `${messageText}  •  ${node.commit.author.name}  •  ${node.commit.sha.substring(0, 7)}`;
+
+      // 커밋 정보 (오른쪽 정렬, 노드와 같은 높이)
       textGroup
         .append('text')
         .attr('x', width - 16)
         .attr('y', node.y)
         .attr('text-anchor', 'end')
         .attr('dominant-baseline', 'middle')
-        .attr('class', 'commit-message')
+        .attr('class', 'commit-info')
         .style('fill', isDark ? '#e5e7eb' : '#1f2937')
         .style('font-size', '13px')
-        .style('font-weight', '500')
         .style('user-select', 'none')
         .style('pointer-events', 'none')
-        .text(messageText);
-
-      // 작성자 + SHA (오른쪽 정렬)
-      textGroup
-        .append('text')
-        .attr('x', width - 16)
-        .attr('y', node.y + 14)
-        .attr('text-anchor', 'end')
-        .attr('class', 'commit-meta')
-        .style('fill', isDark ? '#9ca3af' : '#6b7280')
-        .style('font-size', '11px')
-        .style('user-select', 'none')
-        .style('pointer-events', 'none')
-        .text(metaText);
+        .text(combinedText);
     });
   }, [
     nodes,
